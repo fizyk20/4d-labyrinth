@@ -1,20 +1,12 @@
 #ifndef __GRAPH_4D__
 #define __GRAPH_4D__
 
-#include <windows.h>
+#include <QtOpenGL>
 #include <math.h>
-#include <gl/gl.h>
-#include <gl/glu.h>
-#pragma comment(lib,"opengl32.lib")
-#pragma comment(lib,"glu32.lib")
-
-#ifndef GRAPHDLL
-#define GRAPHDLL __declspec(dllimport)
-#endif
 
 #define pi 3.1415926535
 
-//primitives
+//prymitywy :P
 #define PRIM_INVALID -2
 #define PRIM_QUAD -1
 #define PRIM_NONE 0
@@ -23,7 +15,7 @@
 #define PRIM_TRIANGLE 3
 #define PRIM_TETRA 4
 
-class GRAPHDLL vector4d
+class vector4d
 {
 public:
 	double x,y,z,w;
@@ -41,7 +33,7 @@ public:
 	double Len();
 };
 
-class GRAPHDLL matrix4d
+class matrix4d
 {
 	double a[5][5];
 public:
@@ -69,7 +61,7 @@ struct primitive
 	vertex4d vert[4];
 };
 
-class GRAPHDLL PrimBuffer
+class PrimBuffer
 {
 	unsigned long max_prims;
 	unsigned long num_prims;
@@ -90,7 +82,7 @@ public:
 #define VEC_NORMAL 4
 #define VEC_LOCATION 5
 
-class GRAPHDLL Camera
+class Camera
 {
 	vector4d lookat;
 	vector4d up;
@@ -139,26 +131,28 @@ struct Space
 };
 
 #define MODE_SLICE 1
-#define MODE_PROJ 2		//projection mode not yet implemented
+#define MODE_PROJ 2
 
-class GRAPHDLL Graph4D
+class Graph4D : public QGLWidget
 {
+Q_OBJECT
 	PrimBuffer* buffer;
 	PrimBuffer* local_buffer;
 	MatrixBuffer* m_buffer;
-	HGLRC hrc;
-	HDC hdc;
 	double r,g,b,a;
 
 	int mode;
 
 	void SetBlending(double);
 	primitive Intersect(primitive,Space);
-	void SetupPixelFormat(HDC);
+protected:
+    void initializeGL();
+	void resizeGL(int,int);
+	void paintGL();
 public:
 	Camera* camera;
 
-	Graph4D(HDC);
+	Graph4D(QWidget* parent);
 	~Graph4D();
 	vector4d CalculateLocal(vector4d);
 	
@@ -181,7 +175,7 @@ public:
 	void PushMatrix();
 	void PopMatrix();
 
-	void HandleWMSize(LPARAM);
+	//void HandleWMSize(LPARAM);
 	
 	void Color(double,double,double);
 	void ColorA(double,double,double,double);
@@ -197,12 +191,26 @@ public:
 	void Tesseract(double);
 };
 
-vertex4d GRAPHDLL Vertex(double,double,double,double,double,double,double);		//create colored vertex
-vertex4d GRAPHDLL VertexA(double x,double y,double z,double w,double r,double g,double b,double a);		//create RGBA vertex
+class DrawThread : public QThread
+{
+Q_OBJECT
+protected:
+	Graph4D* graph;
+public:
+	DrawThread(Graph4D*);
+	void run()=0;
+signals:
+	void updateGL();
+};
+
+vertex4d Vertex(double,double,double,double,double,double,double);
+vertex4d VertexA(double x,double y,double z,double w,double r,double g,double b,double a);
 vector4d CrossProduct3(vector4d,vector4d);
 vector4d CrossProduct4(vector4d,vector4d,vector4d);
-matrix4d GRAPHDLL RotationMatrix(vector4d,vector4d,double);
-matrix4d GRAPHDLL TranslationMatrix(vector4d);
-matrix4d GRAPHDLL ScaleMatrix(double,double,double,double);
+matrix4d RotationMatrix(vector4d,vector4d,double);
+matrix4d TranslationMatrix(vector4d);
+matrix4d ScaleMatrix(double,double,double,double);
+
+//Funkcje do rysowania prostych figur
 
 #endif

@@ -1,18 +1,12 @@
-#include "objects.h"
+//#include "obiekty.h"
 #include "Graph4D.h"
-#include "levels.h"
-#include <stdio.h>
-#pragma comment(lib,"Graph4D.lib")
-#pragma comment(lib,"opengl32.lib")
-#pragma comment(lib,"glu32.lib")
+//#include "levels.h"
+#include "okno.h"
+#include <QApplication>
 
-Graph4D* graph;
-LQueue* queue;
-LPlayer* player;
+//LKolejka* kol;
+//LPlayer* player;
 
-int level;
-bool winner;
-HWND winfps,win;
 short fps=0;
 
 #define VK_Q 81
@@ -36,7 +30,7 @@ short fps=0;
 #define VK_U 85
 #define VK_J 74
 
-LRESULT CALLBACK wndproc2(HWND hwnd,UINT msg,WPARAM wparam,LPARAM lparam)
+/*LRESULT CALLBACK wndproc2(HWND hwnd,UINT msg,WPARAM wparam,LPARAM lparam)
 {
 	switch(msg)
 	{
@@ -54,8 +48,8 @@ LRESULT CALLBACK wndproc2(HWND hwnd,UINT msg,WPARAM wparam,LPARAM lparam)
 		}
 		break;
 	case WM_DESTROY:
-		winfps=NULL;
-		if(win!=NULL) DestroyWindow(win);
+		oknofps=NULL;
+		if(okno!=NULL) DestroyWindow(okno);
 		PostQuitMessage(0);
 		break;
 	default:
@@ -73,13 +67,12 @@ LRESULT CALLBACK wndproc(HWND hwnd,UINT msg,WPARAM wparam,LPARAM lparam)
 		graph->EnableTwoSide(true);
 		graph->LightDir(0.0,-0.6,-0.8);
 		LoadLevel(1);
-		level=1;
 		break;
 	case WM_DESTROY:
 		delete graph;
 		graph=NULL;
-		win=NULL;
-		if(winfps!=NULL) DestroyWindow(winfps);
+		okno=NULL;
+		if(oknofps!=NULL) DestroyWindow(oknofps);
 		PostQuitMessage(0);
 		break;
 	case WM_SIZE:
@@ -93,58 +86,58 @@ LRESULT CALLBACK wndproc(HWND hwnd,UINT msg,WPARAM wparam,LPARAM lparam)
 
 long t;
 
-void Controls()
+void Sterowanie()
 {
 	double k=3.2;
 	double r=pi/3;
 	k*=(GetTickCount()-t)/1000.0;
 	r*=(GetTickCount()-t)/1000.0;
 
-//----------------------------movement keys
+//----------------------------klawisze ruchu
 
 	if(GetAsyncKeyState(VK_W))
 	{
 		player->Go(vector4d(0.0,0.0,k,0.0));
-		if(queue->collision()) player->Go(vector4d(0.0,0.0,-k,0.0));
+		if(kol->kolizja()) player->Go(vector4d(0.0,0.0,-k,0.0));
 	}
 	if(GetAsyncKeyState(VK_S))
 	{
 		player->Go(vector4d(0.0,0.0,-k,0.0));
-		if(queue->collision()) player->Go(vector4d(0.0,0.0,k,0.0));
+		if(kol->kolizja()) player->Go(vector4d(0.0,0.0,k,0.0));
 	}
 	if(GetAsyncKeyState(VK_A))
 	{
 		player->Go(vector4d(-k,0.0,0.0,0.0));
-		if(queue->collision()) player->Go(vector4d(k,0.0,0.0,0.0));
+		if(kol->kolizja()) player->Go(vector4d(k,0.0,0.0,0.0));
 	}
 	if(GetAsyncKeyState(VK_D))
 	{
 		player->Go(vector4d(k,0.0,0.0,0.0));
-		if(queue->collision()) player->Go(vector4d(-k,0.0,0.0,0.0));
+		if(kol->kolizja()) player->Go(vector4d(-k,0.0,0.0,0.0));
 	}
 	if(GetAsyncKeyState(VK_Q))
 	{
 		player->Go(vector4d(0.0,k,0.0,0.0));
-		if(queue->collision()) player->Go(vector4d(0.0,-k,0.0,0.0));
+		if(kol->kolizja()) player->Go(vector4d(0.0,-k,0.0,0.0));
 	}
 	if(GetAsyncKeyState(VK_E))
 	{
 		player->Go(vector4d(0.0,-k,0.0,0.0));
-		if(queue->collision()) player->Go(vector4d(0.0,k,0.0,0.0));
+		if(kol->kolizja()) player->Go(vector4d(0.0,k,0.0,0.0));
 	}
-	/*if(GetAsyncKeyState(VK_Z))
+	/if(GetAsyncKeyState(VK_Z))
 	{
 		player->Go(vector4d(0.0,0.0,0.0,k));
-		if(queue->collision()) player->Go(vector4d(0.0,0.0,0.0,-k));
+		if(kol->kolizja()) player->Go(vector4d(0.0,0.0,0.0,-k));
 	}
 	if(GetAsyncKeyState(VK_X))
 	{
 		player->Go(vector4d(0.0,0.0,0.0,-k));
-		if(queue->collision()) player->Go(vector4d(0.0,0.0,0.0,k));
-	}*/
-//------------------------movement keys end
+		if(kol->kolizja()) player->Go(vector4d(0.0,0.0,0.0,k));
+	}/
+//------------------------koniec klawiszy ruchu
 
-//------------------------rotation keys
+//------------------------klawisze obrotu
 	if(GetAsyncKeyState(VK_T))
 		player->RotateXW(r);
 	if(GetAsyncKeyState(VK_G))
@@ -169,79 +162,21 @@ void Controls()
 		player->RotateYZ(r);
 	if(GetAsyncKeyState(VK_N))
 		player->RotateYZ(-r);
-//------------------------rotation keys end
-}
+//------------------------koniec klawiszy obrotu
+}*/
 
-int WINAPI WinMain(HINSTANCE hInst,HINSTANCE,LPSTR,int)
+int main(int argc,char** argv)
 {
-	winner=false;
-
-	WNDCLASSEX wnd;
-
-	wnd.cbClsExtra=0;
-	wnd.cbSize=sizeof(WNDCLASSEX);
-	wnd.cbWndExtra=0;
-	wnd.hbrBackground=NULL;
-	wnd.hCursor=LoadCursor(NULL,IDC_ARROW);
-	wnd.hIcon=wnd.hIconSm=LoadIcon(NULL,IDI_APPLICATION);
-	wnd.hInstance=hInst;
-	wnd.lpfnWndProc=wndproc;
-	wnd.lpszClassName="klasa";
-	wnd.lpszMenuName=NULL;
-	wnd.style=CS_VREDRAW|CS_HREDRAW;
-
-	RegisterClassEx(&wnd);
-	win=CreateWindowEx(0,"klasa","4D Labyrinth",WS_OVERLAPPEDWINDOW,0,0,960,540,0,0,hInst,0);
-	ShowWindow(win,SW_SHOW);
-
-	//FPS Rate
-	wnd.lpfnWndProc=wndproc2;
-	wnd.lpszClassName="klasa2";
-	wnd.hbrBackground=CreateSolidBrush(RGB(255,255,255));
-	wnd.style=0;
-	RegisterClassEx(&wnd);
-	winfps=CreateWindowEx(0,"klasa2","Labirynt4D - FPS",WS_OVERLAPPEDWINDOW,970,0,200,80,0,0,hInst,0);
-	ShowWindow(winfps,SW_SHOW);
-
-	MSG msg;
-
-	t=GetTickCount();
-
-	while(1)
-	{
-		if(PeekMessage(&msg,0,0,0,PM_REMOVE))
+	QApplication app(argc,argv);
+		/*if(graph!=NULL)
 		{
-			if(msg.message==WM_QUIT) break;
-			TranslateMessage(&msg);
-			DispatchMessage(&msg);
-		}
-		if(graph!=NULL)
-		{
-			Controls();
+			Sterowanie();
 			t=GetTickCount();
-			queue->doYourJob();
+			kol->wykonaj();
 			graph->Render();
 			fps++;
-			if(queue->win())
-			{
-				delete queue;
-				level++;
-				if(!LoadLevel(level))
-				{
-					winner=true;
-					DestroyWindow(win);
-				}
-				else 
-				{
-					char next[20];
-					sprintf(next,"Prepare for level %d",level);
-					MessageBox(win,next,"Next level",MB_ICONINFORMATION);
-				}
-			}
-		}
-	}
-
-	if(winner) MessageBox(NULL,"You won!","Congratulations",MB_ICONINFORMATION);
-
-	return(0);
+		}*/
+	Okno* o = new Okno;
+	o->show();
+	return app.exec();
 }

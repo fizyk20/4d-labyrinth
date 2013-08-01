@@ -1,9 +1,9 @@
-#define GRAPHDLL __declspec(dllexport)
 #include "Graph4D.h"
+#include <GL/glu.h>
 
-//version 0.7.8
+//wersja 0.8
 
-//---------------------------------------classes----------------------------------
+//---------------------------------------klasy----------------------------------
 
 //---------------------------------------vector4d-------------------------------
 
@@ -439,35 +439,25 @@ vector4d Camera::GetVector(int ktory)
 	}
 }
 
+//---------------------------------------DrawThread-----------------------------
+
+DrawThread::DrawThread(Graph4D* g)
+{
+	graph = g;
+	connect(this,SIGNAL(updateGL()),graph,SLOT(updateGL()));
+}
+
 //---------------------------------------Graph4D--------------------------------
 
-Graph4D::Graph4D(HDC hdc1)
+Graph4D::Graph4D(QWidget* parent) : QGLWidget(parent)
 {
 	camera=new Camera;
 	buffer=new PrimBuffer;
 	m_buffer=new MatrixBuffer;
-	hdc=hdc1;
-	SetupPixelFormat(hdc);
-	hrc=wglCreateContext(hdc);
-	wglMakeCurrent(hdc,hrc);
-//setting default light options
-	float p[4];
-	p[0]=p[1]=p[2]=0.8f;
-	p[3]=1.0f;
-	EnableLighting(true);
-	glEnable(GL_LIGHT0);
-	glLightfv(GL_LIGHT0,GL_DIFFUSE,p);
-	p[0]=p[1]=p[2]=0.4f;
-	glLightfv(GL_LIGHT0,GL_AMBIENT,p);
-	p[0]=p[3]=0.0f;
-	p[1]=p[2]=-0.707f;
-	glLightfv(GL_LIGHT0,GL_POSITION,p);
-	glShadeModel(GL_SMOOTH);
-	EnableTwoSide(false);
 	a=1.0;
 }
 
-void Graph4D::SetupPixelFormat(HDC hdc)
+/*void Graph4D::SetupPixelFormat(HDC hdc)
 {
 	int nPixelFormat;
 	static PIXELFORMATDESCRIPTOR pfd= {
@@ -481,12 +471,46 @@ void Graph4D::SetupPixelFormat(HDC hdc)
 		PFD_MAIN_PLANE,0,0,0,0};
 	nPixelFormat=ChoosePixelFormat(hdc,&pfd);
 	SetPixelFormat(hdc,nPixelFormat,&pfd);
+}*/
+
+void Graph4D::initializeGL()
+{	
+//ustawienie domyœlnych opcji œwiat³a
+	makeCurrent();
+	float p[4];
+	p[0]=p[1]=p[2]=0.8f;
+	p[3]=1.0f;
+	EnableLighting(true);
+	glEnable(GL_LIGHT0);
+	glLightfv(GL_LIGHT0,GL_DIFFUSE,p);
+	p[0]=p[1]=p[2]=0.4f;
+	glLightfv(GL_LIGHT0,GL_AMBIENT,p);
+	p[0]=p[3]=0.0f;
+	p[1]=p[2]=-0.707f;
+	glLightfv(GL_LIGHT0,GL_POSITION,p);
+	glShadeModel(GL_SMOOTH);
+	EnableTwoSide(false);
+}
+
+void Graph4D::resizeGL(int width,int height)
+{
+	if(width==0) width=1;
+	if(height==0) height=1;
+	glViewport(0,0,width,height);
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	gluPerspective(45.0f,(GLfloat)width/(GLfloat)height,1.0f,1000.0f);
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
+}
+
+void Graph4D::paintGL()
+{
+	Render();
 }
 
 Graph4D::~Graph4D()
 {
-	wglMakeCurrent(hdc,NULL);
-	wglDeleteContext(hrc);
 	if(camera!=NULL) delete camera;
 	if(buffer!=NULL) delete buffer;
 	if(local_buffer!=NULL) delete local_buffer;
@@ -611,7 +635,7 @@ primitive Graph4D::Intersect(primitive prim,Space space)
 	a=space.normal%prim.vert[0].pt+space.e;
 	for(i=1;i<prim.type;i++)
 		if((space.normal%prim.vert[i].pt+space.e)*a<0.0) break;
-	if(i==prim.type) return temp;	//if all vertices are on the same side of the slice, return empty primitive
+	if(i==prim.type) return temp;	//jeœli wszystkie wierzcho³ki s¹ po tej samej stronie przekroju, zwróæ pusty primitive
 
 	switch(prim.type)
 	{
@@ -984,21 +1008,7 @@ void Graph4D::Render()
 	local_buffer=NULL;
 	m_buffer->LoadIdentity();
 	camera->LoadIdentity();
-	SwapBuffers(hdc);
-}
-
-void Graph4D::HandleWMSize(LPARAM lparam)
-{
-	int width,height;
-	width=LOWORD(lparam);
-	height=HIWORD(lparam);
-	if(height==0) height=1;
-	glViewport(0,0,width,height);
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	gluPerspective(45.0f,(GLfloat)width/(GLfloat)height,1.0f,1000.0f);
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
+	swapBuffers();
 }
 
 void Graph4D::Color(double r1,double g1,double b1)
@@ -1156,7 +1166,7 @@ void Graph4D::LightDir(double x,double y,double z)
 	glLightfv(GL_LIGHT0,GL_POSITION,p);
 }
 
-//drawing functions
+//funkcje rysuj¹ce
 
 void Graph4D::Cube(double bok)
 {
@@ -1213,13 +1223,12 @@ void Graph4D::Tesseract(double bok)
 
 //------------------------------------DllMain-------------------------------------
 
-//actually, I have no idea why this is here - I probably forgot to remove it
-BOOL WINAPI DllMain(HANDLE,DWORD,LPVOID)
+/*BOOL WINAPI DllMain(HANDLE,DWORD,LPVOID)
 {
 	return 1;
-}
+}*/
 
-//------------------------------------helpers----------------------------------
+//------------------------------------pomocnicze----------------------------------
 
 vector4d CrossProduct3(vector4d arg1,vector4d arg2)
 {
