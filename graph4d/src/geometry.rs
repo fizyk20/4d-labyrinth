@@ -13,6 +13,9 @@ impl Vector {
     }
 
     pub fn projective_normalize(&mut self) {
+        if self.coords[4] == 1.0 {
+            return
+        }
         self.coords[0] /= self.coords[4];
         self.coords[1] /= self.coords[4];
         self.coords[2] /= self.coords[4];
@@ -80,6 +83,95 @@ impl<'a, T: Borrow<Vector>> ops::Add<T> for &'a Vector {
                 self.coords[1]/self.coords[4] + other.coords[1]/other.coords[4],
                 self.coords[2]/self.coords[4] + other.coords[2]/other.coords[4],
                 self.coords[3]/self.coords[4] + other.coords[3]/other.coords[4],
+                1.0
+            ]
+        }
+    }
+}
+
+impl<T: Borrow<Vector>> ops::Sub<T> for Vector {
+    type Output = Vector;
+
+    fn sub(mut self, other: T) -> Vector {
+        let other = other.borrow();
+        self.projective_normalize();
+        self.coords[0] -= other.coords[0] / other.coords[4];
+        self.coords[1] -= other.coords[1] / other.coords[4];
+        self.coords[2] -= other.coords[2] / other.coords[4];
+        self.coords[3] -= other.coords[3] / other.coords[4];
+        self
+    }
+}
+
+impl<'a, T: Borrow<Vector>> ops::Sub<T> for &'a Vector {
+    type Output = Vector;
+
+    fn sub(self, other: T) -> Vector {
+        let other = other.borrow();
+        Vector {
+            coords: [
+                self.coords[0]/self.coords[4] - other.coords[0]/other.coords[4],
+                self.coords[1]/self.coords[4] - other.coords[1]/other.coords[4],
+                self.coords[2]/self.coords[4] - other.coords[2]/other.coords[4],
+                self.coords[3]/self.coords[4] - other.coords[3]/other.coords[4],
+                1.0
+            ]
+        }
+    }
+}
+
+impl ops::Mul<f64> for Vector {
+    type Output = Vector;
+
+    fn mul(mut self, other: f64) -> Vector {
+        self.projective_normalize();
+        self.coords[0] *= other;
+        self.coords[1] *= other;
+        self.coords[2] *= other;
+        self.coords[3] *= other;
+        self
+    }
+}
+
+impl<'a> ops::Mul<f64> for &'a Vector {
+    type Output = Vector;
+
+    fn mul(self, other: f64) -> Vector {
+        Vector {
+            coords: [
+                self.coords[0] / self.coords[4] * other,
+                self.coords[1] / self.coords[4] * other,
+                self.coords[2] / self.coords[4] * other,
+                self.coords[3] / self.coords[4] * other,
+                1.0
+            ]
+        }
+    }
+}
+
+impl ops::Div<f64> for Vector {
+    type Output = Vector;
+
+    fn div(mut self, other: f64) -> Vector {
+        self.projective_normalize();
+        self.coords[0] /= other;
+        self.coords[1] /= other;
+        self.coords[2] /= other;
+        self.coords[3] /= other;
+        self
+    }
+}
+
+impl<'a> ops::Div<f64> for &'a Vector {
+    type Output = Vector;
+
+    fn div(self, other: f64) -> Vector {
+        Vector {
+            coords: [
+                self.coords[0] / self.coords[4] / other,
+                self.coords[1] / self.coords[4] / other,
+                self.coords[2] / self.coords[4] / other,
+                self.coords[3] / self.coords[4] / other,
                 1.0
             ]
         }
