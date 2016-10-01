@@ -1,4 +1,5 @@
 use std::ops;
+use std::cmp::PartialEq;
 use std::borrow::Borrow;
 
 pub struct Vector {
@@ -23,20 +24,46 @@ impl Vector {
         self.coords[4] = 1.0;
     }
 
+    #[inline]
     pub fn x(&self) -> f64 {
         self.coords[0] / self.coords[4]
     }
 
+    #[inline]
     pub fn y(&self) -> f64 {
         self.coords[1] / self.coords[4]
     }
 
+    #[inline]
     pub fn z(&self) -> f64 {
         self.coords[2] / self.coords[4]
     }
 
+    #[inline]
     pub fn w(&self) -> f64 {
         self.coords[3] / self.coords[4]
+    }
+
+    pub fn dot<T: Borrow<Vector>>(&self, other: T) -> f64 {
+        let other = other.borrow();
+        self.x()*other.x() + self.y()*other.y() + self.z()*other.z() + self.w()*other.w()
+    }
+
+    #[inline]
+    pub fn len(&self) -> f64 {
+        self.dot(self).sqrt()
+    }
+
+    pub fn normalized(&self) -> Vector {
+        self / self.len()
+    }
+
+    pub fn normalize(&mut self) {
+        let len = self.len();
+        self.coords[0] /= len;
+        self.coords[1] /= len;
+        self.coords[2] /= len;
+        self.coords[3] /= len;
     }
 }
 
@@ -175,6 +202,18 @@ impl<'a> ops::Div<f64> for &'a Vector {
                 1.0
             ]
         }
+    }
+}
+
+const EPSILON: f64 = 0.0001;
+
+impl PartialEq for Vector {
+    fn eq(&self, rhs: &Vector) -> bool {
+        let xeq = (self.x() - rhs.x()).abs() < EPSILON;
+        let yeq = (self.y() - rhs.y()).abs() < EPSILON;
+        let zeq = (self.z() - rhs.z()).abs() < EPSILON;
+        let weq = (self.w() - rhs.w()).abs() < EPSILON;
+        xeq && yeq && zeq && weq
     }
 }
 
