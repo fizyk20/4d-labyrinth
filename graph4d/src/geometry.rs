@@ -217,6 +217,112 @@ impl PartialEq for Vector {
     }
 }
 
+impl<T: Borrow<Matrix>> ops::Add<T> for Matrix {
+    type Output = Matrix;
+
+    fn add(mut self, other: T) -> Matrix {
+        let other = other.borrow();
+        for i in 0..5 {
+            for j in 0..5 {
+                self.coords[i][j] += other.coords[i][j];
+            }
+        }
+        self
+    }
+}
+
+impl<'a, T: Borrow<Matrix>> ops::Add<T> for &'a Matrix {
+    type Output = Matrix;
+
+    fn add(self, other: T) -> Matrix {
+        let other = other.borrow();
+        let mut new_coords = [[0.0; 5]; 5];
+        for i in 0..5 {
+            for j in 0..5 {
+                new_coords[i][j] = self.coords[i][j] + other.coords[i][j];
+            }
+        }
+        Matrix { coords: new_coords }
+    }
+}
+
+impl<T: Borrow<Matrix>> ops::Sub<T> for Matrix {
+    type Output = Matrix;
+
+    fn sub(mut self, other: T) -> Matrix {
+        let other = other.borrow();
+        for i in 0..5 {
+            for j in 0..5 {
+                self.coords[i][j] -= other.coords[i][j];
+            }
+        }
+        self
+    }
+}
+
+impl<'a, T: Borrow<Matrix>> ops::Sub<T> for &'a Matrix {
+    type Output = Matrix;
+
+    fn sub(self, other: T) -> Matrix {
+        let other = other.borrow();
+        let mut new_coords = [[0.0; 5]; 5];
+        for i in 0..5 {
+            for j in 0..5 {
+                new_coords[i][j] = self.coords[i][j] - other.coords[i][j];
+            }
+        }
+        Matrix { coords: new_coords }
+    }
+}
+
+impl<'a, T: Borrow<Matrix>> ops::Mul<T> for &'a Matrix {
+    type Output = Matrix;
+
+    fn mul(self, other: T) -> Matrix {
+        let other = other.borrow();
+        let mut new_coords = [[0.0; 5]; 5];
+        for i in 0..5 {
+            for j in 0..5 {
+                for k in 0..5 {
+                    new_coords[i][j] += self.coords[i][k] * other.coords[k][j];
+                }
+            }
+        }
+        Matrix { coords: new_coords }
+    }
+}
+
+impl<T: Borrow<Matrix>> ops::Mul<T> for Matrix {
+    type Output = Matrix;
+
+    fn mul(self, other: T) -> Matrix {
+        &self * other
+    }
+}
+
+// Borrow<Vector> is impossible due to conflicting traits - so just &Vector is used
+impl<'a, 'b> ops::Mul<&'b Vector> for &'a Matrix {
+    type Output = Vector;
+
+    fn mul(self, other: &Vector) -> Vector {
+        let mut new_coords = [0.0; 5];
+        for i in 0..5 {
+            for j in 0..5 {
+                new_coords[i] += self.coords[i][j] * other.coords[j];
+            }
+        }
+        Vector { coords: new_coords }
+    }
+}
+
+impl<'b> ops::Mul<&'b Vector> for Matrix {
+    type Output = Vector;
+
+    fn mul(self, other: &Vector) -> Vector {
+        &self * other
+    }
+}
+
 #[cfg(test)]
 mod test {
     use super::Vector;
