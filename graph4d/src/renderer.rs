@@ -2,6 +2,7 @@ use super::camera::Camera;
 use super::primitive::{Primitive, Vertex, Color};
 use super::geometry::{Vector, Matrix};
 use super::shader::{VERTEX_SHADER, FRAGMENT_SHADER};
+use glium;
 use glium::{Surface, Program, VertexBuffer, IndexBuffer};
 use glium::index::PrimitiveType;
 use glium::backend::Facade;
@@ -35,24 +36,39 @@ impl Renderer {
         }
     }
 
+    pub fn apply_matrix(&mut self, matrix: Matrix) {
+        self.current_transform = matrix * self.current_transform;
+    }
+
     pub fn set_color(&mut self, color: Color) {
         self.current_color = color;
     }
 
     pub fn tetrahedron(&mut self, v1: Vector, v2: Vector, v3: Vector, v4: Vector) {
         self.prim_queue.push(Primitive::Tetra(
-                Vertex::new(self.current_transform * v1, self.current_color),
-                Vertex::new(self.current_transform * v2, self.current_color),
-                Vertex::new(self.current_transform * v3, self.current_color),
-                Vertex::new(self.current_transform * v4, self.current_color)
-                ));
+            Vertex::new(self.current_transform * v1, self.current_color),
+            Vertex::new(self.current_transform * v2, self.current_color),
+            Vertex::new(self.current_transform * v3, self.current_color),
+            Vertex::new(self.current_transform * v4, self.current_color)
+        ));
     }
 
-    fn get_perspective_matrix(&self) -> [[f32; 4]; 4] {
-        [[1.0, 0.0, 0.0, 0.0],
-         [0.0, 1.0, 0.0, 0.0],
-         [0.0, 0.0, 1.0, 0.0],
-         [0.0, 0.0, 0.0, 1.0]]
+    fn get_perspective_matrix<S: Surface>(&self, surface: &S) -> [[f32; 4]; 4] {
+        let (width, height) = surface.get_dimensions();
+        let aspect_ratio = height as f32 / width as f32;
+
+        let fov: f32 = 3.141592 / 3.0;
+        let zfar = 1024.0;
+        let znear = 0.1;
+
+        let f = 1.0 / (fov / 2.0).tan();
+
+        [
+            [f *   aspect_ratio   ,    0.0,              0.0              ,   0.0],
+            [         0.0         ,     f ,              0.0              ,   0.0],
+            [         0.0         ,    0.0,  (zfar+znear)/(zfar-znear)    ,   1.0],
+            [         0.0         ,    0.0, -(2.0*zfar*znear)/(zfar-znear),   0.0],
+        ]
     }
 
     pub fn render<F: Facade, C: Camera, S: Surface>(&mut self, facade: &F, camera: C, surface: &mut S) {
@@ -76,9 +92,25 @@ impl Renderer {
             indices.append(&mut vertexinfo.indices(base));
         }
 
+        let params = glium::DrawParameters {
+            depth: glium::Depth {
+                test: glium::draw_parameters::DepthTest::IfLess,
+                write: true,
+                .. Default::default()
+            },
+            .. Default::default()
+        };
+
         let vertices_buf = VertexBuffer::new(facade, &vertices).unwrap(); 
         let indices_buf = IndexBuffer::new(facade, PrimitiveType::TrianglesList, &indices).unwrap();
+        let matrix = self.get_perspective_matrix(surface);
 
-        surface.draw(&vertices_buf, &indices_buf, &self.shader, &uniform! { matrix: self.get_perspective_matrix() }, &Default::default()).unwrap();
+        surface.draw(&vertices_buf, &indices_buf, &self.shader,
+                     &uniform! {
+                         matrix: matrix,
+                         u_light: [0.0, -1.0, -1.0f32]
+                     }, &params).unwrap();
+
+        self.current_transform = Matrix::identity();
     }
 }

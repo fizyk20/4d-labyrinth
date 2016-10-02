@@ -4,3 +4,5 @@ version = "0.1.0"
 authors = ["Bartłomiej Kamiński <fizyk20@gmail.com>"]
 
 [dependencies]
+glium = "0.15"
+graph4d = { path = "../graph4d" }
