@@ -1,104 +1,6 @@
 use std::ops;
-use std::cmp::PartialEq;
 use std::borrow::Borrow;
-
-pub struct Vector {
-    coords: [f64; 5]
-}
-
-impl Vector {
-    pub fn new(x: f64, y: f64, z: f64, w: f64) -> Vector {
-        Vector {
-            coords: [x, y, z, w, 1.0]
-        }
-    }
-
-    pub fn projective_normalize(&mut self) {
-        if self.coords[4] == 1.0 {
-            return
-        }
-        self.coords[0] /= self.coords[4];
-        self.coords[1] /= self.coords[4];
-        self.coords[2] /= self.coords[4];
-        self.coords[3] /= self.coords[4];
-        self.coords[4] = 1.0;
-    }
-
-    #[inline]
-    pub fn x(&self) -> f64 {
-        self.coords[0] / self.coords[4]
-    }
-
-    #[inline]
-    pub fn y(&self) -> f64 {
-        self.coords[1] / self.coords[4]
-    }
-
-    #[inline]
-    pub fn z(&self) -> f64 {
-        self.coords[2] / self.coords[4]
-    }
-
-    #[inline]
-    pub fn w(&self) -> f64 {
-        self.coords[3] / self.coords[4]
-    }
-
-    pub fn dot<T: Borrow<Vector>>(&self, other: T) -> f64 {
-        let other = other.borrow();
-        self.x()*other.x() + self.y()*other.y() + self.z()*other.z() + self.w()*other.w()
-    }
-
-    #[inline]
-    pub fn len(&self) -> f64 {
-        self.dot(self).sqrt()
-    }
-
-    pub fn normalized(&self) -> Vector {
-        self / self.len()
-    }
-
-    pub fn normalize(&mut self) {
-        let len = self.len();
-        self.coords[0] /= len;
-        self.coords[1] /= len;
-        self.coords[2] /= len;
-        self.coords[3] /= len;
-    }
-
-    pub fn cross3<T, U>(arg1: T, arg2: U) -> Vector
-        where T: Borrow<Vector>, U: Borrow<Vector>
-    {
-        let arg1 = arg1.borrow();
-        let arg2 = arg2.borrow();
-        Vector {
-            coords: [
-                arg1.y() * arg2.z() - arg1.z() * arg2.y(),
-                arg1.z() * arg2.x() - arg1.x() * arg2.z(),
-                arg1.x() * arg2.y() - arg1.y() * arg2.x(),
-                0.0,
-                1.0
-            ]
-        }
-    }
-
-    pub fn cross4<T, U, V>(arg1: T, arg2: U, arg3: V) -> Vector 
-        where T: Borrow<Vector>, U: Borrow<Vector>, V: Borrow<Vector>
-    {
-        let arg1 = arg1.borrow();
-        let arg2 = arg2.borrow();
-        let arg3 = arg3.borrow();
-        Vector {
-            coords: [
-                arg1.y()*arg2.z()*arg3.w() + arg1.z()*arg2.w()*arg3.y() + arg1.w()*arg2.y()*arg3.z() - arg1.y()*arg2.w()*arg3.z() - arg1.z()*arg2.y()*arg3.w() - arg1.w()*arg2.z()*arg3.y(),
-                arg1.z()*arg2.w()*arg3.x() + arg1.w()*arg2.x()*arg3.z() + arg1.x()*arg2.z()*arg3.w() - arg1.z()*arg2.x()*arg3.w() - arg1.w()*arg2.z()*arg3.x() - arg1.x()*arg2.w()*arg3.z(),
-                arg1.w()*arg2.x()*arg3.y() + arg1.x()*arg2.y()*arg3.w() + arg1.y()*arg2.w()*arg3.x() - arg1.w()*arg2.y()*arg3.x() - arg1.x()*arg2.w()*arg3.y() - arg1.y()*arg2.x()*arg3.w(),
-                arg1.x()*arg2.y()*arg3.z() + arg1.y()*arg2.z()*arg3.x() + arg1.z()*arg2.x()*arg3.y() - arg1.x()*arg2.z()*arg3.y() - arg1.y()*arg2.x()*arg3.z() - arg1.z()*arg2.y()*arg3.x(),
-                1.0
-            ]
-        }
-    }
-}
+use super::vector::Vector;
 
 pub struct Matrix {
     coords: [[f64; 5]; 5]
@@ -178,138 +80,6 @@ impl Matrix {
                 [0.0, 0.0, 0.0, 0.0, 1.0]
             ]
         }
-    }
-}
-
-impl<T: Borrow<Vector>> ops::Add<T> for Vector {
-    type Output = Vector;
-
-    fn add(mut self, other: T) -> Vector {
-        let other = other.borrow();
-        self.projective_normalize();
-        self.coords[0] += other.coords[0] / other.coords[4];
-        self.coords[1] += other.coords[1] / other.coords[4];
-        self.coords[2] += other.coords[2] / other.coords[4];
-        self.coords[3] += other.coords[3] / other.coords[4];
-        self
-    }
-}
-
-impl<'a, T: Borrow<Vector>> ops::Add<T> for &'a Vector {
-    type Output = Vector;
-
-    fn add(self, other: T) -> Vector {
-        let other = other.borrow();
-        Vector {
-            coords: [
-                self.coords[0]/self.coords[4] + other.coords[0]/other.coords[4],
-                self.coords[1]/self.coords[4] + other.coords[1]/other.coords[4],
-                self.coords[2]/self.coords[4] + other.coords[2]/other.coords[4],
-                self.coords[3]/self.coords[4] + other.coords[3]/other.coords[4],
-                1.0
-            ]
-        }
-    }
-}
-
-impl<T: Borrow<Vector>> ops::Sub<T> for Vector {
-    type Output = Vector;
-
-    fn sub(mut self, other: T) -> Vector {
-        let other = other.borrow();
-        self.projective_normalize();
-        self.coords[0] -= other.coords[0] / other.coords[4];
-        self.coords[1] -= other.coords[1] / other.coords[4];
-        self.coords[2] -= other.coords[2] / other.coords[4];
-        self.coords[3] -= other.coords[3] / other.coords[4];
-        self
-    }
-}
-
-impl<'a, T: Borrow<Vector>> ops::Sub<T> for &'a Vector {
-    type Output = Vector;
-
-    fn sub(self, other: T) -> Vector {
-        let other = other.borrow();
-        Vector {
-            coords: [
-                self.coords[0]/self.coords[4] - other.coords[0]/other.coords[4],
-                self.coords[1]/self.coords[4] - other.coords[1]/other.coords[4],
-                self.coords[2]/self.coords[4] - other.coords[2]/other.coords[4],
-                self.coords[3]/self.coords[4] - other.coords[3]/other.coords[4],
-                1.0
-            ]
-        }
-    }
-}
-
-impl ops::Mul<f64> for Vector {
-    type Output = Vector;
-
-    fn mul(mut self, other: f64) -> Vector {
-        self.projective_normalize();
-        self.coords[0] *= other;
-        self.coords[1] *= other;
-        self.coords[2] *= other;
-        self.coords[3] *= other;
-        self
-    }
-}
-
-impl<'a> ops::Mul<f64> for &'a Vector {
-    type Output = Vector;
-
-    fn mul(self, other: f64) -> Vector {
-        Vector {
-            coords: [
-                self.coords[0] / self.coords[4] * other,
-                self.coords[1] / self.coords[4] * other,
-                self.coords[2] / self.coords[4] * other,
-                self.coords[3] / self.coords[4] * other,
-                1.0
-            ]
-        }
-    }
-}
-
-impl ops::Div<f64> for Vector {
-    type Output = Vector;
-
-    fn div(mut self, other: f64) -> Vector {
-        self.projective_normalize();
-        self.coords[0] /= other;
-        self.coords[1] /= other;
-        self.coords[2] /= other;
-        self.coords[3] /= other;
-        self
-    }
-}
-
-impl<'a> ops::Div<f64> for &'a Vector {
-    type Output = Vector;
-
-    fn div(self, other: f64) -> Vector {
-        Vector {
-            coords: [
-                self.coords[0] / self.coords[4] / other,
-                self.coords[1] / self.coords[4] / other,
-                self.coords[2] / self.coords[4] / other,
-                self.coords[3] / self.coords[4] / other,
-                1.0
-            ]
-        }
-    }
-}
-
-const EPSILON: f64 = 0.0001;
-
-impl PartialEq for Vector {
-    fn eq(&self, rhs: &Vector) -> bool {
-        let xeq = (self.x() - rhs.x()).abs() < EPSILON;
-        let yeq = (self.y() - rhs.y()).abs() < EPSILON;
-        let zeq = (self.z() - rhs.z()).abs() < EPSILON;
-        let weq = (self.w() - rhs.w()).abs() < EPSILON;
-        xeq && yeq && zeq && weq
     }
 }
 
@@ -404,10 +174,10 @@ impl<'a, 'b> ops::Mul<&'b Vector> for &'a Matrix {
         let mut new_coords = [0.0; 5];
         for i in 0..5 {
             for j in 0..5 {
-                new_coords[i] += self.coords[i][j] * other.coords[j];
+                new_coords[i] += self.coords[i][j] * other.coord(j);
             }
         }
-        Vector { coords: new_coords }
+        Vector::from_array(new_coords)
     }
 }
 
@@ -421,58 +191,9 @@ impl<'b> ops::Mul<&'b Vector> for Matrix {
 
 #[cfg(test)]
 mod test {
-    use super::{Vector, Matrix};
-
-    #[test]
-    fn test_add_vectors() {
-        let a = Vector::new(0.0, 1.0, 2.0, 3.0);
-        let b = Vector::new(2.0, 3.0, 8.0, 7.0);
-        let c = a + &b;
-        assert_eq!(c.x(), 2.0);
-        assert_eq!(c.y(), 4.0);
-        assert_eq!(c.z(), 10.0);
-        assert_eq!(c.w(), 10.0);
-    }
-
-    #[test]
-    fn test_sub_vectors() {
-        let a = Vector::new(0.0, 1.0, 2.0, 3.0);
-        let b = Vector::new(2.0, 3.0, 8.0, 7.0);
-        let c = a - &b;
-        assert_eq!(c.x(), -2.0);
-        assert_eq!(c.y(), -2.0);
-        assert_eq!(c.z(), -6.0);
-        assert_eq!(c.w(), -4.0);
-    }
-
-    #[test]
-    fn test_mul_vec_f64() {
-        let a = Vector::new(0.0, 1.0, 2.0, 3.0);
-        let c = a * 3.0;
-        assert_eq!(c.x(), 0.0);
-        assert_eq!(c.y(), 3.0);
-        assert_eq!(c.z(), 6.0);
-        assert_eq!(c.w(), 9.0);
-    }
-
-    #[test]
-    fn test_div_vec_f64() {
-        let a = Vector::new(0.0, 1.0, 2.0, 3.0);
-        let c = a / 2.0;
-        assert_eq!(c.x(), 0.0);
-        assert_eq!(c.y(), 0.5);
-        assert_eq!(c.z(), 1.0);
-        assert_eq!(c.w(), 1.5);
-    }
-
-    #[test]
-    fn test_dot_product() {
-        let a = Vector::new(0.0, 1.0, 2.0, 3.0);
-        let b = Vector::new(2.0, 3.0, 8.0, 7.0);
-        let c = a.dot(b);
-        assert_eq!(c, 40.0);
-    }
-
+    use super::Matrix;
+    use super::super::Vector;
+    
     #[test]
     fn test_add_matrices() {
         let a = Matrix::from_array([[0.0, 1.0, 2.0, 3.0, 4.0],
@@ -612,11 +333,10 @@ mod test {
                                     [2.0, 3.0, 3.0, 1.0, 0.0]]);
         let b = Vector::new(2.0, -2.0, 1.0, 3.0);
         let c = a * &b;
-        assert_eq!(c.coords[0], 13.0);
-        assert_eq!(c.coords[1], 0.0);
-        assert_eq!(c.coords[2], -17.0);
-        assert_eq!(c.coords[3], 1.0);
-        assert_eq!(c.coords[4], 4.0);
+        assert_eq!(c.coord(0), 13.0);
+        assert_eq!(c.coord(1), 0.0);
+        assert_eq!(c.coord(2), -17.0);
+        assert_eq!(c.coord(3), 1.0);
+        assert_eq!(c.coord(4), 4.0);
     }
-
 }
