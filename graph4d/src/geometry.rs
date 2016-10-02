@@ -65,6 +65,39 @@ impl Vector {
         self.coords[2] /= len;
         self.coords[3] /= len;
     }
+
+    pub fn cross3<T, U>(arg1: T, arg2: U) -> Vector
+        where T: Borrow<Vector>, U: Borrow<Vector>
+    {
+        let arg1 = arg1.borrow();
+        let arg2 = arg2.borrow();
+        Vector {
+            coords: [
+                arg1.y() * arg2.z() - arg1.z() * arg2.y(),
+                arg1.z() * arg2.x() - arg1.x() * arg2.z(),
+                arg1.x() * arg2.y() - arg1.y() * arg2.x(),
+                0.0,
+                1.0
+            ]
+        }
+    }
+
+    pub fn cross4<T, U, V>(arg1: T, arg2: U, arg3: V) -> Vector 
+        where T: Borrow<Vector>, U: Borrow<Vector>, V: Borrow<Vector>
+    {
+        let arg1 = arg1.borrow();
+        let arg2 = arg2.borrow();
+        let arg3 = arg3.borrow();
+        Vector {
+            coords: [
+                arg1.y()*arg2.z()*arg3.w() + arg1.z()*arg2.w()*arg3.y() + arg1.w()*arg2.y()*arg3.z() - arg1.y()*arg2.w()*arg3.z() - arg1.z()*arg2.y()*arg3.w() - arg1.w()*arg2.z()*arg3.y(),
+                arg1.z()*arg2.w()*arg3.x() + arg1.w()*arg2.x()*arg3.z() + arg1.x()*arg2.z()*arg3.w() - arg1.z()*arg2.x()*arg3.w() - arg1.w()*arg2.z()*arg3.x() - arg1.x()*arg2.w()*arg3.z(),
+                arg1.w()*arg2.x()*arg3.y() + arg1.x()*arg2.y()*arg3.w() + arg1.y()*arg2.w()*arg3.x() - arg1.w()*arg2.y()*arg3.x() - arg1.x()*arg2.w()*arg3.y() - arg1.y()*arg2.x()*arg3.w(),
+                arg1.x()*arg2.y()*arg3.z() + arg1.y()*arg2.z()*arg3.x() + arg1.z()*arg2.x()*arg3.y() - arg1.x()*arg2.z()*arg3.y() - arg1.y()*arg2.x()*arg3.z() - arg1.z()*arg2.y()*arg3.x(),
+                1.0
+            ]
+        }
+    }
 }
 
 pub struct Matrix {
