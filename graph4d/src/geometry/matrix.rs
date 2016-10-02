@@ -58,6 +58,78 @@ impl Matrix {
         }
     }
 
+    pub fn rotation_xy(phi: f64) -> Matrix {
+        Matrix {
+            coords: [
+                [ phi.cos(), -phi.sin(), 0.0, 0.0, 0.0 ],
+                [ phi.sin(), phi.cos(), 0.0, 0.0, 0.0 ],
+                [ 0.0, 0.0, 1.0, 0.0, 0.0 ],
+                [ 0.0, 0.0, 0.0, 1.0, 0.0 ],
+                [ 0.0, 0.0, 0.0, 0.0, 1.0 ]
+            ]
+        }
+    }
+
+    pub fn rotation_xz(phi: f64) -> Matrix {
+        Matrix {
+            coords: [
+                [ phi.cos(), 0.0, -phi.sin(), 0.0, 0.0 ],
+                [ 0.0, 1.0, 0.0, 0.0, 0.0 ],
+                [ phi.sin(), 0.0, phi.cos(), 0.0, 0.0 ],
+                [ 0.0, 0.0, 0.0, 1.0, 0.0 ],
+                [ 0.0, 0.0, 0.0, 0.0, 1.0 ]
+            ]
+        }
+    }
+
+    pub fn rotation_xw(phi: f64) -> Matrix {
+        Matrix {
+            coords: [
+                [ phi.cos(), 0.0, 0.0, -phi.sin(), 0.0 ],
+                [ 0.0, 1.0, 0.0, 0.0, 0.0 ],
+                [ 0.0, 0.0, 1.0, 0.0, 0.0 ],
+                [ phi.sin(), 0.0, 0.0, phi.cos(), 0.0 ],
+                [ 0.0, 0.0, 0.0, 0.0, 1.0 ]
+            ]
+        }
+    }
+
+    pub fn rotation_yz(phi: f64) -> Matrix {
+        Matrix {
+            coords: [
+                [ 1.0, 0.0, 0.0, 0.0, 0.0 ],
+                [ 0.0, phi.cos(), -phi.sin(), 0.0, 0.0 ],
+                [ 0.0, phi.sin(), phi.cos(), 0.0, 0.0 ],
+                [ 0.0, 0.0, 0.0, 1.0, 0.0 ],
+                [ 0.0, 0.0, 0.0, 0.0, 1.0 ]
+            ]
+        }
+    }
+
+    pub fn rotation_yw(phi: f64) -> Matrix {
+        Matrix {
+            coords: [
+                [ 1.0, 0.0, 0.0, 0.0, 0.0 ],
+                [ 0.0, phi.cos(), 0.0, -phi.sin(), 0.0 ],
+                [ 0.0, 0.0, 1.0, 0.0, 0.0 ],
+                [ 0.0, phi.sin(), 0.0, phi.cos(), 0.0 ],
+                [ 0.0, 0.0, 0.0, 0.0, 1.0 ]
+            ]
+        }
+    }
+
+    pub fn rotation_zw(phi: f64) -> Matrix {
+        Matrix {
+            coords: [
+                [ 1.0, 0.0, 0.0, 0.0, 0.0 ],
+                [ 0.0, 1.0, 0.0, 0.0, 0.0 ],
+                [ 0.0, 0.0, phi.cos(), -phi.sin(), 0.0 ],
+                [ 0.0, 0.0, phi.sin(), phi.cos(), 0.0 ],
+                [ 0.0, 0.0, 0.0, 0.0, 1.0 ]
+            ]
+        }
+    }
+
     pub fn translation(v: Vector) -> Matrix {
         let mut result = Matrix::identity();
         result.coords[0][4] = v.x();

@@ -26,10 +26,7 @@ fn main() {
         let mut target = display.draw();
         target.clear_color_and_depth((0.0, 0.0, 0.4, 1.0), 1.0);
         renderer.set_color(Color::rgb(0.0, 0.0, 1.0));
-        renderer.apply_matrix(Matrix::rotation(
-                Vector::new(0.0, 1.0, 0.0, 0.0),
-                Vector::new(0.0, 0.0, 0.0, 1.0),
-                t));
+        renderer.rotate_xz(t);
         t += 0.01;
         renderer.apply_matrix(Matrix::translation(Vector::new(0.0, 0.0, 3.0, 0.0)));
         renderer.tetrahedron(

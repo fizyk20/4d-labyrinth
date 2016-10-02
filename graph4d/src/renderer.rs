@@ -40,6 +40,30 @@ impl Renderer {
         self.current_transform = matrix * self.current_transform;
     }
 
+    pub fn rotate_xy(&mut self, phi: f64) {
+        self.apply_matrix(Matrix::rotation_xy(phi));
+    }
+
+    pub fn rotate_xz(&mut self, phi: f64) {
+        self.apply_matrix(Matrix::rotation_xz(phi));
+    }
+
+    pub fn rotate_xw(&mut self, phi: f64) {
+        self.apply_matrix(Matrix::rotation_xw(phi));
+    }
+
+    pub fn rotate_yz(&mut self, phi: f64) {
+        self.apply_matrix(Matrix::rotation_yz(phi));
+    }
+
+    pub fn rotate_yw(&mut self, phi: f64) {
+        self.apply_matrix(Matrix::rotation_yw(phi));
+    }
+
+    pub fn rotate_zw(&mut self, phi: f64) {
+        self.apply_matrix(Matrix::rotation_zw(phi));
+    }
+
     pub fn set_color(&mut self, color: Color) {
         self.current_color = color;
     }
