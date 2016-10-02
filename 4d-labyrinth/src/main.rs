@@ -26,8 +26,8 @@ fn main() {
         let mut target = display.draw();
         target.clear_color_and_depth((0.0, 0.0, 0.1, 1.0), 1.0);
         renderer.set_color(Color::rgb(1.0, 0.0, 0.0));
-        renderer.rotate_xz(t);
-        renderer.rotate_yw(t*0.67);
+        renderer.rotate_yz(t);
+        renderer.rotate_xw(t*0.67);
         t += 0.01;
         renderer.apply_matrix(Matrix::translation(Vector::new(0.0, 0.0, 3.0, 0.0)));
         renderer.tesseract(1.0);

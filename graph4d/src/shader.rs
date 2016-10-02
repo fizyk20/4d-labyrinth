@@ -71,7 +71,8 @@ uniform vec3 u_light;
 
 void main() {
     float brightness = dot(normalize(v_normal), normalize(u_light));
-    vec4 dark_color = vec4(0.0, 0.0, 0.0, v_color[3]);
+    vec3 dark_color3 = normalize(vec3(v_color[0], v_color[1], v_color[2]))*0.1;
+    vec4 dark_color = vec4(dark_color3, v_color[3]);
     color = vec4(mix(dark_color, v_color, abs(brightness)));
 }
 "#;

@@ -353,20 +353,29 @@ impl Primitive {
         let mindot = if dot[0] < dot[1] { 0 } else { 1 };
         let mindot = if dot[mindot] < dot[2] { mindot } else { 2 };
 
-        let mut indices = vec![ 0 ];
+        let mut indices = Vec::new();
 
         match mindot {
             0 => {
+                indices.push(0);
+                indices.push(1);
+                indices.push(2);
                 indices.push(1);
                 indices.push(2);
                 indices.push(3);
             },
             1 => {
+                indices.push(0);
+                indices.push(1);
+                indices.push(3);
                 indices.push(1);
                 indices.push(3);
                 indices.push(2);
             },
             2 => {
+                indices.push(0);
+                indices.push(2);
+                indices.push(3);
                 indices.push(2);
                 indices.push(3);
                 indices.push(1);
