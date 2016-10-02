@@ -316,4 +316,14 @@ impl Primitive {
             unreachable!()
         }
     }
+
+    pub fn map<F: Fn(Vertex) -> Vertex>(self, f: F) -> Primitive {
+        match self {
+            Primitive::Point(v1) => Primitive::Point(f(v1)),
+            Primitive::Line(v1, v2) => Primitive::Line(f(v1), f(v2)),
+            Primitive::Triangle(v1, v2, v3) => Primitive::Triangle(f(v1), f(v2), f(v3)),
+            Primitive::Tetra(v1, v2, v3, v4) => Primitive::Tetra(f(v1), f(v2), f(v3), f(v4)),
+            Primitive::Quad(v1, v2, v3, v4) => Primitive::Quad(f(v1), f(v2), f(v3), f(v4))
+        }
+    }
 }
