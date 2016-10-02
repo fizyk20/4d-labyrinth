@@ -1,4 +1,5 @@
 use super::geometry::{Vector, Hyperplane};
+use super::shader::{GliumVertex, VertexInfo};
 use std::ops;
 use std::convert::From;
 
@@ -314,6 +315,110 @@ impl Primitive {
         }
         else {
             unreachable!()
+        }
+    }
+
+    fn vertexinfo_point(p1: Vertex) -> VertexInfo {
+        VertexInfo::new(
+            vec![ GliumVertex::new(p1.point(), Vector::new(0.0, 0.0, 0.0, 0.0), p1.color()) ],
+            vec![ 0 ]
+        )
+    }
+
+    fn vertexinfo_line(p1: Vertex, p2: Vertex) -> VertexInfo {
+        VertexInfo::new(
+            vec![ GliumVertex::new(p1.point(), Vector::new(0.0, 0.0, 0.0, 0.0), p1.color()),
+                  GliumVertex::new(p2.point(), Vector::new(0.0, 0.0, 0.0, 0.0), p2.color()) ],
+            vec![ 0, 1 ]
+        )
+    }
+
+    fn vertexinfo_triangle(p1: Vertex, p2: Vertex, p3: Vertex) -> VertexInfo {
+        let v1 = p2.point() - p1.point();
+        let v2 = p3.point() - p1.point();
+        let normal = Vector::cross3(v2, v1).normalized();
+        VertexInfo::new(
+            vec![ GliumVertex::new(p1.point(), normal, p1.color()),
+                  GliumVertex::new(p2.point(), normal, p2.color()),
+                  GliumVertex::new(p3.point(), normal, p3.color()) ],
+            vec![ 0, 1, 2 ]
+        )
+    }
+
+    fn vertexinfo_quad(p1: Vertex, p2: Vertex, p3: Vertex, p4: Vertex) -> VertexInfo {
+        let v1 = (p2.point() - p1.point()).normalized();
+        let v2 = (p3.point() - p1.point()).normalized();
+        let v3 = (p4.point() - p1.point()).normalized();
+        let dot = [v1.dot(v2), v1.dot(v3), v2.dot(v3)];
+        let mindot = if dot[0] < dot[1] { 0 } else { 1 };
+        let mindot = if dot[mindot] < dot[2] { mindot } else { 2 };
+
+        let mut indices = vec![ 0 ];
+
+        match mindot {
+            0 => {
+                indices.push(1);
+                indices.push(2);
+                indices.push(3);
+            },
+            1 => {
+                indices.push(1);
+                indices.push(3);
+                indices.push(2);
+            },
+            2 => {
+                indices.push(2);
+                indices.push(3);
+                indices.push(1);
+            },
+            _ => unreachable!()
+        };
+
+        let normal = Vector::cross3(v2, v1).normalized();
+
+        VertexInfo::new(
+            vec![ GliumVertex::new(p1.point(), normal, p1.color()),
+                  GliumVertex::new(p2.point(), normal, p2.color()),
+                  GliumVertex::new(p3.point(), normal, p3.color()),
+                  GliumVertex::new(p4.point(), normal, p4.color()) ],
+            indices
+        )
+    }
+
+    fn vertexinfo_tetra(p1: Vertex, p2: Vertex, p3: Vertex, p4: Vertex) -> VertexInfo {
+        let v21 = p2.point() - p1.point();
+        let v31 = p3.point() - p1.point();
+        let v41 = p4.point() - p1.point();
+        let v23 = p2.point() - p3.point();
+        let v43 = p4.point() - p3.point();
+        let normal1 = Vector::cross3(v31, v21).normalized();
+        let normal2 = Vector::cross3(v41, v31).normalized();
+        let normal3 = Vector::cross3(v21, v41).normalized();
+        let normal4 = Vector::cross3(v43, v23).normalized();
+        VertexInfo::new(
+            vec![ GliumVertex::new(p1.point(), normal1, p1.color()),
+                  GliumVertex::new(p2.point(), normal1, p2.color()),
+                  GliumVertex::new(p3.point(), normal1, p3.color()),
+                  GliumVertex::new(p1.point(), normal2, p1.color()),
+                  GliumVertex::new(p3.point(), normal2, p3.color()),
+                  GliumVertex::new(p4.point(), normal2, p4.color()),
+                  GliumVertex::new(p1.point(), normal3, p1.color()),
+                  GliumVertex::new(p4.point(), normal3, p4.color()),
+                  GliumVertex::new(p2.point(), normal3, p2.color()),
+                  GliumVertex::new(p3.point(), normal4, p3.color()),
+                  GliumVertex::new(p2.point(), normal4, p2.color()),
+                  GliumVertex::new(p4.point(), normal4, p4.color()) ],
+            vec![ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11 ]
+        )
+    }
+
+    pub fn get_vertexinfo(&self) -> VertexInfo {
+        match *self {
+            Primitive::Point(p1) => Primitive::vertexinfo_point(p1),
+            Primitive::Line(p1, p2) => Primitive::vertexinfo_line(p1, p2),
+            Primitive::Triangle(p1, p2, p3) => Primitive::vertexinfo_triangle(p1, p2, p3),
+            Primitive::Quad(p1, p2, p3, p4) => Primitive::vertexinfo_quad(p1, p2, p3, p4),
+            Primitive::Tetra(p1, p2, p3, p4) => Primitive::vertexinfo_tetra(p1, p2, p3, p4)
         }
     }
 

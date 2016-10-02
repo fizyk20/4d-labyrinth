@@ -1,21 +1,27 @@
 use super::camera::Camera;
 use super::primitive::{Primitive, Vertex, Color};
 use super::geometry::{Vector, Matrix};
+use super::shader::{VERTEX_SHADER, FRAGMENT_SHADER};
+use glium::{Surface, Program, VertexBuffer, IndexBuffer};
+use glium::index::PrimitiveType;
+use glium::backend::Facade;
 
 pub struct Renderer {
     current_transform: Matrix,
     matrix_stack: Vec<Matrix>,
     prim_queue: Vec<Primitive>,
-    current_color: Color
+    current_color: Color,
+    shader: Program
 }
 
 impl Renderer {
-    pub fn new() -> Renderer {
+    pub fn new<F: Facade>(display: &F) -> Renderer {
         Renderer {
             current_transform: Matrix::identity(),
             matrix_stack: Vec::new(),
             prim_queue: Vec::new(),
-            current_color: Color::rgb(1.0, 1.0, 1.0)
+            current_color: Color::rgb(1.0, 1.0, 1.0),
+            shader: Program::from_source(display, VERTEX_SHADER, FRAGMENT_SHADER, None).unwrap()
         }
     }
 
@@ -42,7 +48,14 @@ impl Renderer {
                 ));
     }
 
-    pub fn render<C: Camera>(&mut self, camera: C) {
+    fn get_perspective_matrix(&self) -> [[f32; 4]; 4] {
+        [[1.0, 0.0, 0.0, 0.0],
+         [0.0, 1.0, 0.0, 0.0],
+         [0.0, 0.0, 1.0, 0.0],
+         [0.0, 0.0, 0.0, 1.0]]
+    }
+
+    pub fn render<F: Facade, C: Camera, S: Surface>(&mut self, facade: &F, camera: C, surface: &mut S) {
         let mut local_queue = Vec::new();
         self.matrix_stack.clear();
 
@@ -52,5 +65,20 @@ impl Renderer {
             }
         }
         self.prim_queue.clear();
+
+        let mut vertices = Vec::new();
+        let mut indices = Vec::new();
+
+        for prim in local_queue.iter() {
+            let vertexinfo = prim.get_vertexinfo();
+            let base = vertices.len() as u32;
+            vertices.append(&mut vertexinfo.vertices());
+            indices.append(&mut vertexinfo.indices(base));
+        }
+
+        let vertices_buf = VertexBuffer::new(facade, &vertices).unwrap(); 
+        let indices_buf = IndexBuffer::new(facade, PrimitiveType::TrianglesList, &indices).unwrap();
+
+        surface.draw(&vertices_buf, &indices_buf, &self.shader, &uniform! { matrix: self.get_perspective_matrix() }, &Default::default()).unwrap();
     }
 }
