@@ -120,6 +120,65 @@ impl Matrix {
     pub fn from_array(arr: [[f64; 5]; 5]) -> Matrix {
         Matrix { coords: arr }
     }
+
+    pub fn rotation<T, U>(n1: T, n2: U, phi: f64) -> Matrix
+        where T: Borrow<Vector>, U: Borrow<Vector>
+    {
+        let n1 = n1.borrow().normalized();
+        let n2 = n2.borrow().normalized();
+        let dot = n1.dot(&n2);
+        let n2 = (n2 - (&n1 * dot)).normalized();
+        let sinf = phi.sin();
+        let cosf = phi.cos();
+        let cosf1 = 1.0 - cosf;
+        Matrix {
+            coords: [
+                [(n1.x()*n1.x() + n2.x()*n2.x())*cosf1 + cosf,
+                 (n1.y()*n1.x() + n2.y()*n2.x())*cosf1 - (n1.z()*n2.w() - n1.w()*n2.z())*sinf,
+                 (n1.z()*n1.x() + n2.z()*n2.x())*cosf1 + (n1.y()*n2.w() - n1.w()*n2.y())*sinf,
+                 (n1.w()*n1.x() + n2.w()*n2.x())*cosf1 - (n1.y()*n2.z() - n1.z()*n2.y())*sinf,
+                 0.0],
+                [(n1.x()*n1.y() + n2.x()*n2.y())*cosf1 + (n1.z()*n2.w() - n1.w()*n2.z())*sinf,
+                 (n1.y()*n1.y() + n2.y()*n2.y())*cosf1 + cosf,
+                 (n1.z()*n1.y() + n2.z()*n2.y())*cosf1 - (n1.x()*n2.w() - n1.w()*n2.x())*sinf,
+                 (n1.w()*n1.y() + n2.w()*n2.y())*cosf1 + (n1.x()*n2.z() - n1.z()*n2.x())*sinf,
+                 0.0],
+                [(n1.x()*n1.z() + n2.x()*n2.z())*cosf1 - (n1.y()*n2.w() - n1.w()*n2.y())*sinf,
+                 (n1.y()*n1.z() + n2.y()*n2.z())*cosf1 + (n1.x()*n2.w() - n1.w()*n2.x())*sinf,
+                 (n1.z()*n1.z() + n2.z()*n2.z())*cosf1 + cosf,
+                 (n1.w()*n1.z() + n2.w()*n2.z())*cosf1 - (n1.x()*n2.y() - n1.y()*n2.x())*sinf,
+                 0.0],
+                [(n1.x()*n1.w() + n2.x()*n2.w())*cosf1 + (n1.y()*n2.z() - n1.z()*n2.y())*sinf,
+                 (n1.y()*n1.w() + n2.y()*n2.w())*cosf1 - (n1.x()*n2.z() - n1.z()*n2.x())*sinf,
+                 (n1.z()*n1.w() + n2.z()*n2.w())*cosf1 + (n1.x()*n2.y() - n1.y()*n2.x())*sinf,
+                 (n1.w()*n1.w() + n2.w()*n2.w())*cosf1 + cosf,
+                 0.0],
+                [0.0, 0.0, 0.0, 0.0, 1.0]
+            ]
+        }
+    }
+
+    pub fn translation<T: Borrow<Vector>>(v: T) -> Matrix {
+        let mut result = Matrix::identity();
+        let v = v.borrow();
+        result.coords[0][4] = v.x();
+        result.coords[1][4] = v.y();
+        result.coords[2][4] = v.z();
+        result.coords[3][4] = v.w();
+        result
+    }
+
+    pub fn scale(x: f64, y: f64, z: f64, w: f64) -> Matrix {
+        Matrix {
+            coords: [
+                [x, 0.0, 0.0, 0.0, 0.0],
+                [0.0, y, 0.0, 0.0, 0.0],
+                [0.0, 0.0, z, 0.0, 0.0],
+                [0.0, 0.0, 0.0, w, 0.0],
+                [0.0, 0.0, 0.0, 0.0, 1.0]
+            ]
+        }
+    }
 }
 
 impl<T: Borrow<Vector>> ops::Add<T> for Vector {
