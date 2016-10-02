@@ -77,6 +77,67 @@ impl Renderer {
         ));
     }
 
+    pub fn cube(&mut self, a: f64) {
+        let v = [
+            Vector::new(-a/2.0, -a/2.0, -a/2.0, 0.0),
+            Vector::new(-a/2.0, -a/2.0,  a/2.0, 0.0),
+            Vector::new(-a/2.0, -a/2.0, -a/2.0, 0.0),
+            Vector::new(-a/2.0,  a/2.0,  a/2.0, 0.0),
+            Vector::new( a/2.0,  a/2.0, -a/2.0, 0.0),
+            Vector::new( a/2.0, -a/2.0,  a/2.0, 0.0),
+            Vector::new( a/2.0,  a/2.0, -a/2.0, 0.0),
+            Vector::new( a/2.0,  a/2.0,  a/2.0, 0.0)
+        ];
+
+        self.tetrahedron(v[0], v[2], v[1], v[4]);
+        self.tetrahedron(v[5], v[7], v[4], v[1]);
+        self.tetrahedron(v[6], v[4], v[7], v[2]);
+        self.tetrahedron(v[3], v[1], v[2], v[7]);
+        self.tetrahedron(v[2], v[7], v[1], v[4]);
+    }
+
+    fn cube_vertex_array(&mut self, vertices: &[Vector], indices: [usize; 8]) {
+        let mut v = Vec::new();
+        for i in indices.iter() {
+            v.push(vertices[*i]);
+        }
+        self.tetrahedron(v[0], v[2], v[1], v[4]);
+        self.tetrahedron(v[5], v[7], v[4], v[1]);
+        self.tetrahedron(v[6], v[4], v[7], v[2]);
+        self.tetrahedron(v[3], v[1], v[2], v[7]);
+        self.tetrahedron(v[2], v[7], v[1], v[4]);
+    }
+
+    pub fn tesseract(&mut self, a: f64) {
+        let v = [
+            Vector::new(-a/2.0, -a/2.0, -a/2.0, -a/2.0),
+            Vector::new(-a/2.0, -a/2.0, -a/2.0,  a/2.0),
+            Vector::new(-a/2.0, -a/2.0,  a/2.0, -a/2.0),
+            Vector::new(-a/2.0, -a/2.0,  a/2.0,  a/2.0),
+            Vector::new(-a/2.0,  a/2.0, -a/2.0, -a/2.0),
+            Vector::new(-a/2.0,  a/2.0, -a/2.0,  a/2.0),
+            Vector::new(-a/2.0,  a/2.0,  a/2.0, -a/2.0),
+            Vector::new(-a/2.0,  a/2.0,  a/2.0,  a/2.0),
+            Vector::new( a/2.0, -a/2.0, -a/2.0, -a/2.0),
+            Vector::new( a/2.0, -a/2.0, -a/2.0,  a/2.0),
+            Vector::new( a/2.0, -a/2.0,  a/2.0, -a/2.0),
+            Vector::new( a/2.0, -a/2.0,  a/2.0,  a/2.0),
+            Vector::new( a/2.0,  a/2.0, -a/2.0, -a/2.0),
+            Vector::new( a/2.0,  a/2.0, -a/2.0,  a/2.0),
+            Vector::new( a/2.0,  a/2.0,  a/2.0, -a/2.0),
+            Vector::new( a/2.0,  a/2.0,  a/2.0,  a/2.0)
+        ];
+
+        self.cube_vertex_array(&v, [0,1,2,3,4,5,6,7]);
+        self.cube_vertex_array(&v, [8,9,10,11,12,13,14,15]);
+        self.cube_vertex_array(&v, [0,1,2,3,8,9,10,11]);
+        self.cube_vertex_array(&v, [4,5,6,7,12,13,14,15]);
+        self.cube_vertex_array(&v, [0,1,4,5,8,9,12,13]);
+        self.cube_vertex_array(&v, [2,3,6,7,10,11,14,15]);
+        self.cube_vertex_array(&v, [0,2,4,6,8,10,12,14]);
+        self.cube_vertex_array(&v, [1,3,5,7,9,11,13,15]);
+    }
+
     fn get_perspective_matrix<S: Surface>(&self, surface: &S) -> [[f32; 4]; 4] {
         let (width, height) = surface.get_dimensions();
         let aspect_ratio = height as f32 / width as f32;
