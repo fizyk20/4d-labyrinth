@@ -13,7 +13,7 @@ impl Hyperplane {
         }
     }
 
-    pub fn dot(&self, v: &Vector) -> f64 {
+    pub fn dot(&self, v: Vector) -> f64 {
         self.normal.dot(v) + self.param
     }
 }
