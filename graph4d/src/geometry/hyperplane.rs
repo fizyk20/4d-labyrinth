@@ -1,5 +1,6 @@
 use super::Vector;
 
+#[derive(Clone, Copy)]
 pub struct Hyperplane {
     normal: Vector,
     param: f64
