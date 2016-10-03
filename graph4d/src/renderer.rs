@@ -3,7 +3,7 @@ use super::primitive::{Primitive, Vertex, Color};
 use super::geometry::{Vector, Matrix};
 use super::shader::{VERTEX_SHADER, FRAGMENT_SHADER};
 use glium;
-use glium::{Surface, Program, VertexBuffer, IndexBuffer};
+use glium::{Surface, Program, VertexBuffer, IndexBuffer, Blend};
 use glium::index::PrimitiveType;
 use glium::backend::Facade;
 
@@ -183,6 +183,7 @@ impl Renderer {
                 write: true,
                 .. Default::default()
             },
+            blend: Blend::alpha_blending(),
             .. Default::default()
         };
 

@@ -25,7 +25,7 @@ fn main() {
     loop {
         let mut target = display.draw();
         target.clear_color_and_depth((0.0, 0.0, 0.1, 1.0), 1.0);
-        renderer.set_color(Color::rgb(1.0, 0.0, 0.0));
+        renderer.set_color(Color::rgba(1.0, 0.0, 0.0, 0.5));
         renderer.rotate_yz(t);
         renderer.rotate_xw(t*0.67);
         t += 0.01;
