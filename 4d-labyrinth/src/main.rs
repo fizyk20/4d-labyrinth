@@ -1,19 +1,38 @@
 extern crate graph4d;
 extern crate glium;
 
+mod objects;
+
+use objects::{Player, GameObject};
+
 use glium::{DisplayBuild, Surface};
-use graph4d::geometry::{Vector, Matrix, Hyperplane};
+use glium::glutin::{ElementState, VirtualKeyCode};
+use graph4d::geometry::{Vector, Matrix};
 use graph4d::primitive::Color;
+use std::collections::HashSet;
+use std::time::SystemTime;
 
-struct Camera;
+pub struct KeyboardState {
+    pressed_keys: HashSet<VirtualKeyCode>
+}
 
-impl graph4d::camera::Camera for Camera {
-    fn get_hyperplane(&self) -> Hyperplane {
-        Hyperplane::new(Vector::new(0.0, 0.0, 0.0, 1.0), 0.0)
+impl KeyboardState {
+    pub fn new() -> KeyboardState {
+        KeyboardState {
+            pressed_keys: HashSet::new()
+        }
     }
 
-    fn calculate_local(&self, vec: Vector) -> Vector {
-        vec
+    fn pressed(&mut self, key: VirtualKeyCode) {
+        self.pressed_keys.insert(key);
+    }
+
+    fn released(&mut self, key: VirtualKeyCode) {
+        self.pressed_keys.remove(&key);
+    }
+
+    pub fn is_pressed(&self, key: VirtualKeyCode) -> bool {
+        self.pressed_keys.contains(&key)
     }
 }
 
@@ -21,25 +40,43 @@ fn main() {
     let display = glium::glutin::WindowBuilder::new().with_depth_buffer(24).build_glium().unwrap();
     let mut renderer = graph4d::renderer::Renderer::new(&display);
     let mut t = 0.0;
+    let mut keyboard = KeyboardState::new();
+    let mut player = Player::new();
+    player.go(Vector::new(0.0, 0.0, -10.0, 0.0));
+
+    let mut now = SystemTime::now();
 
     loop {
         let mut target = display.draw();
-        target.clear_color_and_depth((0.0, 0.0, 0.1, 1.0), 1.0);
+        target.clear_color_and_depth((0.0, 0.0, 0.0, 1.0), 1.0);
+        player.draw(&mut renderer);
         renderer.set_color(Color::rgba(1.0, 0.0, 0.0, 0.5));
+        renderer.push_matrix();
         renderer.rotate_yz(t);
         renderer.rotate_xw(t*0.67);
         t += 0.01;
         renderer.apply_matrix(Matrix::translation(Vector::new(0.0, 0.0, 3.0, 0.0)));
         renderer.tesseract(1.0);
-        renderer.render(&display, Camera, &mut target);
+        renderer.pop_matrix();
+        renderer.render(&display, &player, &mut target);
         target.finish().unwrap();
 
         // listing the events produced by the window and waiting to be received
         for ev in display.poll_events() {
              match ev {
                  glium::glutin::Event::Closed => return,   // the window has been closed by the user
+                 glium::glutin::Event::KeyboardInput(state, _, Some(key)) => match state {
+                     ElementState::Pressed => keyboard.pressed(key),
+                     ElementState::Released => keyboard.released(key)
+                 },
                  _ => ()
              }
         }
+
+        let frame_time = now.elapsed().unwrap();
+        let frame_time = frame_time.as_secs() as f64 + (frame_time.subsec_nanos() as f64) / 1e9;
+        now = SystemTime::now();
+
+        player.handle_input(&keyboard, frame_time);
     }
 }

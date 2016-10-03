@@ -156,7 +156,7 @@ impl Renderer {
         ]
     }
 
-    pub fn render<F: Facade, C: Camera, S: Surface>(&mut self, facade: &F, camera: C, surface: &mut S) {
+    pub fn render<F: Facade, C: Camera, S: Surface>(&mut self, facade: &F, camera: &C, surface: &mut S) {
         let mut local_queue = Vec::new();
         self.matrix_stack.clear();
 
