@@ -81,9 +81,9 @@ impl Renderer {
         let v = [
             Vector::new(-a/2.0, -a/2.0, -a/2.0, 0.0),
             Vector::new(-a/2.0, -a/2.0,  a/2.0, 0.0),
-            Vector::new(-a/2.0, -a/2.0, -a/2.0, 0.0),
+            Vector::new(-a/2.0,  a/2.0, -a/2.0, 0.0),
             Vector::new(-a/2.0,  a/2.0,  a/2.0, 0.0),
-            Vector::new( a/2.0,  a/2.0, -a/2.0, 0.0),
+            Vector::new( a/2.0, -a/2.0, -a/2.0, 0.0),
             Vector::new( a/2.0, -a/2.0,  a/2.0, 0.0),
             Vector::new( a/2.0,  a/2.0, -a/2.0, 0.0),
             Vector::new( a/2.0,  a/2.0,  a/2.0, 0.0)

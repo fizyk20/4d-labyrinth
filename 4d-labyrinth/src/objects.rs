@@ -4,13 +4,24 @@ use graph4d::camera::Camera;
 use graph4d::geometry::{Vector, Matrix, Hyperplane};
 use graph4d::primitive::Color;
 use glium::glutin::VirtualKeyCode;
+use std::f64::consts::PI;
 
 pub trait GameObject {
     fn draw(&self, renderer: &mut Renderer);
-    fn handle_input(&mut self, keyboard: &KeyboardState, time: f64);
+    fn handle_input(&mut self, keyboard: &KeyboardState, time: f64) -> AdditionalAction;
+    fn perform_action(&mut self, action: AdditionalAction);
 }
 
-const SIZE: f64 = 0.2;
+pub trait Collidable {
+    fn collides(&self, action: &AdditionalAction) -> bool;
+}
+
+const SIZE: f64 = 0.4;
+
+pub enum AdditionalAction {
+    None,
+    MoveTo(Vector)
+}
 
 pub struct Player {
     up: Vector,
@@ -82,16 +93,18 @@ impl GameObject for Player {
         renderer.push_matrix();
         renderer.apply_matrix(self.orientation);
         renderer.apply_matrix(Matrix::translation(self.position));
-        renderer.tesseract(2.0*SIZE);
+        renderer.tesseract(SIZE);
         renderer.pop_matrix();
     }
 
-    fn handle_input(&mut self, keyboard: &KeyboardState, time: f64) {
+    fn handle_input(&mut self, keyboard: &KeyboardState, time: f64) -> AdditionalAction {
         let vel = 3.2;
         let angvel = 1.05;
 
         let distance = vel * time;
         let angle = angvel * time;
+
+        let old_position = self.position;
 
         // movements
         if keyboard.is_pressed(VirtualKeyCode::W) {
@@ -150,6 +163,22 @@ impl GameObject for Player {
         if keyboard.is_pressed(VirtualKeyCode::N) {
             self.rotate_yz(-angle);
         }
+
+        if self.position != old_position {
+            let result = AdditionalAction::MoveTo(self.position);
+            self.position = old_position;
+            result
+        }
+        else {
+            AdditionalAction::None
+        }
+    }
+
+    fn perform_action(&mut self, action: AdditionalAction) {
+        match action {
+            AdditionalAction::MoveTo(pos) => self.position = pos,
+            _ => ()
+        }
     }
 }
 
@@ -168,3 +197,85 @@ impl Camera for Player {
     }
 }
 
+pub struct Wall {
+    middle: Vector,
+    size: Vector,
+    transformation_matrix: Matrix
+}
+
+impl Wall {
+    pub fn new(middle: Vector, size: Vector) -> Wall {
+        let pi_2 = PI / 2.0;
+        let rotation_matrix =
+            if size.w() == 0.0 {
+                Matrix::identity()
+            }
+            else if size.x() == 0.0 {
+                Matrix::rotation_xw(pi_2)
+            }
+            else if size.y() == 0.0 {
+                Matrix::rotation_yw(pi_2)
+            }
+            else if size.z() == 0.0 {
+                Matrix::rotation_zw(pi_2)
+            }
+            else {
+                panic!("Wall without a zero dimension!")
+            };
+        let scale_matrix =
+            if size.w() == 0.0 {
+                Matrix::scale(size.x(), size.y(), size.z(), 1.0)
+            }
+            else if size.x() == 0.0 {
+                Matrix::scale(size.w(), size.y(), size.z(), 1.0)
+            }
+            else if size.y() == 0.0 {
+                Matrix::scale(size.x(), size.w(), size.z(), 1.0)
+            }
+            else if size.z() == 0.0 {
+                Matrix::scale(size.x(), size.y(), size.w(), 1.0)
+            }
+            else {
+                panic!("Wall without a zero dimension!")
+            };
+        let translation_matrix = Matrix::translation(middle);
+        Wall {
+            middle: middle,
+            size: size,
+            transformation_matrix: translation_matrix * rotation_matrix * scale_matrix
+        }
+    }
+}
+
+impl GameObject for Wall {
+    fn draw(&self, renderer: &mut Renderer) {
+        renderer.set_color(Color::rgba(0.6, 0.6, 0.6, 0.2));
+        renderer.push_matrix();
+        renderer.apply_matrix(self.transformation_matrix);
+        renderer.cube(1.0);
+        renderer.pop_matrix();
+    }
+
+    fn handle_input(&mut self, _: &KeyboardState, _: f64) -> AdditionalAction {
+        AdditionalAction::None
+    }
+
+    fn perform_action(&mut self, _: AdditionalAction) {
+    }
+}
+
+impl Collidable for Wall {
+    fn collides(&self, action: &AdditionalAction) -> bool {
+        match *action {
+            AdditionalAction::MoveTo(pos) => {
+                let x = (pos.x() - self.middle.x()).abs() < (self.size.x() + SIZE) / 2.0;
+                let y = (pos.y() - self.middle.y()).abs() < (self.size.y() + SIZE) / 2.0;
+                let z = (pos.z() - self.middle.z()).abs() < (self.size.z() + SIZE) / 2.0;
+                let w = (pos.w() - self.middle.w()).abs() < (self.size.w() + SIZE) / 2.0;
+
+                x && y && z && w
+            },
+            _ => false
+        }
+    }
+}

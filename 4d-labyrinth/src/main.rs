@@ -3,7 +3,7 @@ extern crate glium;
 
 mod objects;
 
-use objects::{Player, GameObject};
+use objects::{Player, Wall, GameObject, Collidable};
 
 use glium::{DisplayBuild, Surface};
 use glium::glutin::{ElementState, VirtualKeyCode};
@@ -36,13 +36,21 @@ impl KeyboardState {
     }
 }
 
+fn generate_level() -> Vec<Wall> {
+    vec! [
+        Wall::new(Vector::new(3.0, 0.0, 4.0, 0.0), Vector::new(0.0, 5.0, 10.0, 5.0))
+    ]
+}
+
 fn main() {
     let display = glium::glutin::WindowBuilder::new().with_depth_buffer(24).build_glium().unwrap();
     let mut renderer = graph4d::renderer::Renderer::new(&display);
     let mut t = 0.0;
     let mut keyboard = KeyboardState::new();
+
     let mut player = Player::new();
     player.go(Vector::new(0.0, 0.0, -10.0, 0.0));
+    let walls = generate_level();
 
     let mut now = SystemTime::now();
 
@@ -59,6 +67,9 @@ fn main() {
         renderer.tesseract(1.0);
         renderer.pop_matrix();
         renderer.render(&display, &player, &mut target);
+        for w in walls.iter() {
+            w.draw(&mut renderer);
+        }
         target.finish().unwrap();
 
         // listing the events produced by the window and waiting to be received
@@ -77,6 +88,15 @@ fn main() {
         let frame_time = frame_time.as_secs() as f64 + (frame_time.subsec_nanos() as f64) / 1e9;
         now = SystemTime::now();
 
-        player.handle_input(&keyboard, frame_time);
+        let action = player.handle_input(&keyboard, frame_time);
+        let mut let_move = true;
+        for w in walls.iter() {
+            if w.collides(&action) {
+                let_move = false;
+            }
+        }
+        if let_move {
+            player.perform_action(action);
+        }
     }
 }
