@@ -1,7 +1,11 @@
+#![feature(conservative_impl_trait)]
+
 extern crate graph4d;
 extern crate glium;
+extern crate regex;
 
 mod objects;
+mod levels;
 
 use objects::{Player, Wall, GameObject, Collidable};
 
