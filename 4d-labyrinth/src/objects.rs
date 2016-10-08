@@ -8,8 +8,6 @@ use std::f64::consts::PI;
 
 pub trait GameObject {
     fn draw(&self, renderer: &mut Renderer);
-    fn handle_input(&mut self, keyboard: &KeyboardState, time: f64) -> AdditionalAction;
-    fn perform_action(&mut self, action: AdditionalAction);
 }
 
 pub trait Collidable {
@@ -85,19 +83,8 @@ impl Player {
         let matrix = Matrix::rotation(self.front, self.ana, phi);
         self.apply_matrix(matrix);
     }
-}
 
-impl GameObject for Player {
-    fn draw(&self, renderer: &mut Renderer) {
-        renderer.set_color(Color::rgb(0.6, 0.6, 0.0));
-        renderer.push_matrix();
-        renderer.apply_matrix(self.orientation);
-        renderer.apply_matrix(Matrix::translation(self.position));
-        renderer.tesseract(SIZE);
-        renderer.pop_matrix();
-    }
-
-    fn handle_input(&mut self, keyboard: &KeyboardState, time: f64) -> AdditionalAction {
+    pub fn handle_input(&mut self, keyboard: &KeyboardState, time: f64) -> AdditionalAction {
         let vel = 3.2;
         let angvel = 1.05;
 
@@ -174,11 +161,22 @@ impl GameObject for Player {
         }
     }
 
-    fn perform_action(&mut self, action: AdditionalAction) {
+    pub fn perform_action(&mut self, action: AdditionalAction) {
         match action {
             AdditionalAction::MoveTo(pos) => self.position = pos,
             _ => ()
         }
+    }
+}
+
+impl GameObject for Player {
+    fn draw(&self, renderer: &mut Renderer) {
+        renderer.set_color(Color::rgb(0.6, 0.6, 0.0));
+        renderer.push_matrix();
+        renderer.apply_matrix(self.orientation);
+        renderer.apply_matrix(Matrix::translation(self.position));
+        renderer.tesseract(SIZE);
+        renderer.pop_matrix();
     }
 }
 
@@ -255,13 +253,6 @@ impl GameObject for Wall {
         renderer.cube(1.0);
         renderer.pop_matrix();
     }
-
-    fn handle_input(&mut self, _: &KeyboardState, _: f64) -> AdditionalAction {
-        AdditionalAction::None
-    }
-
-    fn perform_action(&mut self, _: AdditionalAction) {
-    }
 }
 
 impl Collidable for Wall {
@@ -301,13 +292,6 @@ impl GameObject for Target {
         renderer.apply_matrix(Matrix::translation(self.position));
         renderer.tesseract(self.size);
         renderer.pop_matrix();
-    }
-
-    fn handle_input(&mut self, _: &KeyboardState, _: f64) -> AdditionalAction {
-        AdditionalAction::None
-    }
-
-    fn perform_action(&mut self, _: AdditionalAction) {
     }
 }
 

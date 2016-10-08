@@ -7,7 +7,6 @@ extern crate regex;
 mod objects;
 mod levels;
 
-use objects::GameObject;
 use levels::Level;
 
 use glium::{DisplayBuild, Surface};
