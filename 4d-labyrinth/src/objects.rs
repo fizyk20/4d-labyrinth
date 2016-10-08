@@ -279,3 +279,50 @@ impl Collidable for Wall {
         }
     }
 }
+
+pub struct Target {
+    position: Vector,
+    size: f64
+}
+
+impl Target {
+    pub fn new(position: Vector, size: f64) -> Target {
+        Target {
+            position: position,
+            size: size
+        }
+    }
+}
+
+impl GameObject for Target {
+    fn draw(&self, renderer: &mut Renderer) {
+        renderer.set_color(Color::rgba(0.0, 0.2, 1.0, 0.4));
+        renderer.push_matrix();
+        renderer.apply_matrix(Matrix::translation(self.position));
+        renderer.tesseract(self.size);
+        renderer.pop_matrix();
+    }
+
+    fn handle_input(&mut self, _: &KeyboardState, _: f64) -> AdditionalAction {
+        AdditionalAction::None
+    }
+
+    fn perform_action(&mut self, _: AdditionalAction) {
+    }
+}
+
+impl Collidable for Target {
+    fn collides(&self, action: &AdditionalAction) -> bool {
+        match *action {
+            AdditionalAction::MoveTo(pos) => {
+                let x = (pos.x() - self.position.x()).abs() < (self.size + SIZE) / 2.0;
+                let y = (pos.y() - self.position.y()).abs() < (self.size + SIZE) / 2.0;
+                let z = (pos.z() - self.position.z()).abs() < (self.size + SIZE) / 2.0;
+                let w = (pos.w() - self.position.w()).abs() < (self.size + SIZE) / 2.0;
+
+                x && y && z && w
+            },
+            _ => false
+        }
+    }
+}
