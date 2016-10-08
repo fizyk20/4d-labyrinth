@@ -7,12 +7,11 @@ extern crate regex;
 mod objects;
 mod levels;
 
-use objects::{Player, Wall, GameObject, Collidable};
+use objects::GameObject;
+use levels::Level;
 
 use glium::{DisplayBuild, Surface};
 use glium::glutin::{ElementState, VirtualKeyCode};
-use graph4d::geometry::{Vector, Matrix};
-use graph4d::primitive::Color;
 use std::collections::HashSet;
 use std::time::SystemTime;
 
@@ -40,40 +39,22 @@ impl KeyboardState {
     }
 }
 
-fn generate_level() -> Vec<Wall> {
-    vec! [
-        Wall::new(Vector::new(3.0, 0.0, 4.0, 0.0), Vector::new(0.0, 5.0, 10.0, 5.0))
-    ]
-}
-
 fn main() {
     let display = glium::glutin::WindowBuilder::new().with_depth_buffer(24).build_glium().unwrap();
     let mut renderer = graph4d::renderer::Renderer::new(&display);
-    let mut t = 0.0;
     let mut keyboard = KeyboardState::new();
 
-    let mut player = Player::new();
-    player.go(Vector::new(0.0, 0.0, -10.0, 0.0));
-    let walls = generate_level();
+    let mut level = Level::from_file("level1.dat").unwrap();
 
     let mut now = SystemTime::now();
 
     loop {
         let mut target = display.draw();
         target.clear_color_and_depth((0.0, 0.0, 0.0, 1.0), 1.0);
-        player.draw(&mut renderer);
-        renderer.set_color(Color::rgba(1.0, 0.0, 0.0, 0.5));
-        renderer.push_matrix();
-        renderer.rotate_yz(t);
-        renderer.rotate_xw(t*0.67);
-        t += 0.01;
-        renderer.apply_matrix(Matrix::translation(Vector::new(0.0, 0.0, 3.0, 0.0)));
-        renderer.tesseract(1.0);
-        renderer.pop_matrix();
-        renderer.render(&display, &player, &mut target);
-        for w in walls.iter() {
-            w.draw(&mut renderer);
+        for object in level.game_objects() {
+            object.draw(&mut renderer);
         }
+        renderer.render(&display, &*level.player(), &mut target);
         target.finish().unwrap();
 
         // listing the events produced by the window and waiting to be received
@@ -92,15 +73,18 @@ fn main() {
         let frame_time = frame_time.as_secs() as f64 + (frame_time.subsec_nanos() as f64) / 1e9;
         now = SystemTime::now();
 
-        let action = player.handle_input(&keyboard, frame_time);
+        let action = level.player().handle_input(&keyboard, frame_time);
         let mut let_move = true;
-        for w in walls.iter() {
-            if w.collides(&action) {
+        for c in level.collidables() {
+            if c.collides(&action) {
                 let_move = false;
             }
         }
+        if level.wins(&action) {
+            return;
+        }
         if let_move {
-            player.perform_action(action);
+            level.player().perform_action(action);
         }
     }
 }

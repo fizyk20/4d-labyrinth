@@ -56,7 +56,7 @@ impl Level {
     }
 
     fn process_lines(s1: String, s2: String, s3: String) -> LineResult {
-        let coord_line = Regex::new(r"^(?P<x>\d+(\.\d+)?)\s+(?P<y>\d+(\.\d+)?)\s+(?P<z>\d+(\.\d+)?)\s+(?P<w>\d+(\.\d+)?)").unwrap();
+        let coord_line = Regex::new(r"^(?P<x>-?\d+(\.\d+)?)\s+(?P<y>-?\d+(\.\d+)?)\s+(?P<z>-?\d+(\.\d+)?)\s+(?P<w>-?\d+(\.\d+)?)").unwrap();
         let cap1 = coord_line.captures(&s1).unwrap();
         let cap2 = coord_line.captures(&s2).unwrap();
         let (x1, y1, z1, w1): (f64, f64, f64, f64) =
@@ -75,7 +75,7 @@ impl Level {
         let (z1, z2) = if z1 < z2 { (z1, z2) } else { (z2, z1) };
         let (w1, w2) = if w1 < w2 { (w1, w2) } else { (w2, w1) };
 
-        if s3 == "T\n" {
+        if s3 == "T" {
             return LineResult::Target(Target::new(
                     Vector::new((x1+x2)/2.0, (y1+y2)/2.0, (z1+z2)/2.0, (w1+w2)/2.0),
                     x2 - x1));
@@ -115,5 +115,9 @@ impl Level {
 
     pub fn wins(&self, action: &AdditionalAction) -> bool {
         self.target.collides(action)
+    }
+
+    pub fn player(&mut self) -> &mut Player {
+        &mut self.player
     }
 }
