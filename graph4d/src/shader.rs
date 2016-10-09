@@ -16,6 +16,10 @@ impl GliumVertex {
             color: [c.r() as f32, c.g() as f32, c.b() as f32, c.a() as f32]
         }
     }
+
+    pub fn color(&self) -> [f32; 4] {
+        self.color
+    }
 }
 
 implement_vertex!(GliumVertex, position, normal, color);
@@ -37,8 +41,8 @@ impl VertexInfo {
         self.vertices.clone()
     }
 
-    pub fn indices(&self, base: u32) -> Vec<u32> {
-        self.indices.iter().map(|x| x + base).collect()
+    pub fn indices(&self) -> Vec<u32> {
+        self.indices.clone()
     }
 }
 

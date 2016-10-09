@@ -167,35 +167,37 @@ impl Renderer {
         }
         self.prim_queue.clear();
 
-        let mut vertices = Vec::new();
-        let mut indices = Vec::new();
+        let matrix = self.get_perspective_matrix(surface);
 
         for prim in local_queue.iter() {
             let vertexinfo = prim.get_vertexinfo();
-            let base = vertices.len() as u32;
-            vertices.append(&mut vertexinfo.vertices());
-            indices.append(&mut vertexinfo.indices(base));
-        }
+            let vertices = vertexinfo.vertices();
+            let indices = vertexinfo.indices();
 
-        let params = glium::DrawParameters {
-            depth: glium::Depth {
-                test: glium::draw_parameters::DepthTest::IfLess,
-                write: true,
+            let params = glium::DrawParameters {
+                depth: glium::Depth {
+                            test: glium::draw_parameters::DepthTest::IfLess,
+                            write: vertices[0].color()[3] > 0.99,
+                            .. Default::default()
+                        },
+                blend: 
+                    if vertices[0].color()[3] < 1.0 {
+                        Blend::alpha_blending()
+                    } else {
+                        Default::default()
+                    },
                 .. Default::default()
-            },
-            blend: Blend::alpha_blending(),
-            .. Default::default()
-        };
+            };
 
-        let vertices_buf = VertexBuffer::new(facade, &vertices).unwrap(); 
-        let indices_buf = IndexBuffer::new(facade, PrimitiveType::TrianglesList, &indices).unwrap();
-        let matrix = self.get_perspective_matrix(surface);
+            let vertices_buf = VertexBuffer::new(facade, &vertices).unwrap(); 
+            let indices_buf = IndexBuffer::new(facade, PrimitiveType::TrianglesList, &indices).unwrap();
 
-        surface.draw(&vertices_buf, &indices_buf, &self.shader,
-                     &uniform! {
-                         matrix: matrix,
-                         u_light: [0.0, -1.0, -1.0f32]
-                     }, &params).unwrap();
+            surface.draw(&vertices_buf, &indices_buf, &self.shader,
+                         &uniform! {
+                             matrix: matrix,
+                             u_light: [0.0, -1.0, -1.0f32]
+                         }, &params).unwrap();
+        }
 
         self.current_transform = Matrix::identity();
     }
