@@ -195,7 +195,7 @@ impl Renderer {
             surface.draw(&vertices_buf, &indices_buf, &self.shader,
                          &uniform! {
                              matrix: matrix,
-                             u_light: [0.0, -1.0, -1.0f32]
+                             u_light: [0.0, -0.6, -0.8f32]
                          }, &params).unwrap();
         }
 
