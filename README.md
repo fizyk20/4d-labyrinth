@@ -24,8 +24,13 @@ The player can move using the following keys:
 * R/Y - yaw left/right
 * U/J/C/V/B/N - rotate the visible slice of the hyperspace
 
+Notes
+-----
+
+* The program uses OpenGL via the awesome [Glium](https://github.com/tomaka/glium) crate
+* Rust nightly is required for compilation due to some usage of the `impl Trait` feature
+
 TODOs
 -----
 
 * Enable the second level
-* Fix issues with transparency, which make the level look confusing
