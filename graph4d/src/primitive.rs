@@ -142,43 +142,39 @@ impl Primitive {
             tmp.push(prim);
         }
 
-        if tmp.len() == 0 {
+        match tmp.len() {
             // no intersections - return None
-            None
-        }
-        else if tmp.len() == 1 {
+            0 => None,
             // one intersection - return it (should never happen, actually)
-            Some(tmp[0])
-        }
-        else if tmp.len() == 2 {
+            1 => Some(tmp[0]),
             // two intersections - should be 2 points
-            if let (Primitive::Point(v1), Primitive::Point(v2)) = (tmp[0], tmp[1]) {
-                if v1.point() == v2.point() {
-                    Some(Primitive::Point(v1))
+            2 =>
+                if let (Primitive::Point(v1), Primitive::Point(v2)) = (tmp[0], tmp[1]) {
+                    if v1.point() == v2.point() {
+                        Some(Primitive::Point(v1))
+                    }
+                    else {
+                        Some(Primitive::Line(v1, v2))
+                    }
                 }
                 else {
-                    Some(Primitive::Line(v1, v2))
-                }
-            }
-            else {
-                unreachable!()
-            }
-        }
-        else {
-            // 3 intersections - either 3 lines, or a line and 2 points
-            if let (Primitive::Line(_, _), Primitive::Line(_, _), Primitive::Line(_, _)) = (tmp[0], tmp[1], tmp[2]) {
-                Some(Primitive::Triangle(p1, p2, p3))
-            }
-            else {
-                // a line and 2 points - find the line and return it
-                if let Some(l) = tmp.iter().find(|&&x| if let Primitive::Line(_,_) = x { true } else { false }) {
-                    Some(*l)
-                }
-                else {
-                    // this case should be impossible
                     unreachable!()
+                },
+            // 3 intersections - either 3 lines, or a line and 2 points
+            _ =>
+                if let (Primitive::Line(_, _), Primitive::Line(_, _), Primitive::Line(_, _)) = (tmp[0], tmp[1], tmp[2]) {
+                    Some(Primitive::Triangle(p1, p2, p3))
                 }
-            }
+                else {
+                    // a line and 2 points - find the line and return it
+                    if let Some(l) = tmp.iter().find(|&&x| if let Primitive::Line(_,_) = x { true } else { false }) {
+                        Some(*l)
+                    }
+                    else {
+                        // this case should be impossible
+                        unreachable!()
+                    }
+                }
         }
     }
 
@@ -201,37 +197,31 @@ impl Primitive {
             tmp.push(prim);
         }
 
-        if tmp.len() == 0 {
-            None
-        }
-        else if tmp.len() == 2 {
-            if let (Primitive::Point(v1), Primitive::Point(v2)) = (tmp[0], tmp[1]) {
-                if v1.point() == v2.point() {
-                    Some(Primitive::Point(v1))
+        match tmp.len() {
+            0 => None,
+            2 =>
+                if let (Primitive::Point(v1), Primitive::Point(v2)) = (tmp[0], tmp[1]) {
+                    if v1.point() == v2.point() {
+                        Some(Primitive::Point(v1))
+                    }
+                    else {
+                        Some(Primitive::Line(v1, v2))
+                    }
                 }
                 else {
-                    Some(Primitive::Line(v1, v2))
-                }
-            }
-            else {
-                unreachable!()
-            }
-        }
-        else if tmp.len() == 3 {
+                    unreachable!()
+                },
             // a line and 2 points - find the line and return it
-            if let Some(l) = tmp.iter().find(|&&x| if let Primitive::Line(_,_) = x { true } else { false }) {
-                Some(*l)
-            }
-            else {
-                // this case (no line amongst the 3 intersections) should be impossible
-                unreachable!()
-            }
-        }
-        else if tmp.len() == 4 {
-            Some(Primitive::Quad(p1, p2, p3, p4))
-        }
-        else {
-            unreachable!()
+            3 =>
+                if let Some(l) = tmp.iter().find(|&&x| if let Primitive::Line(_,_) = x { true } else { false }) {
+                    Some(*l)
+                }
+                else {
+                    // this case (no line amongst the 3 intersections) should be impossible
+                    unreachable!()
+                },
+            4 => Some(Primitive::Quad(p1, p2, p3, p4)),
+            _ => unreachable!()
         }
     }
 
@@ -262,59 +252,54 @@ impl Primitive {
             tmp.push(prim);
         }
 
-        if tmp.len() == 0 {
-            None
-        }
-        else if tmp.len() == 3 {
-            if let (Primitive::Point(v1), Primitive::Point(v2), Primitive::Point(v3)) = (tmp[0], tmp[1], tmp[2]) {
-                if v1.point() == v2.point() && v2.point() == v3.point() {
-                    Some(Primitive::Point(v1))
+        match tmp.len() {
+            0 => None,
+            3 =>
+                if let (Primitive::Point(v1), Primitive::Point(v2), Primitive::Point(v3)) = (tmp[0], tmp[1], tmp[2]) {
+                    if v1.point() == v2.point() && v2.point() == v3.point() {
+                        Some(Primitive::Point(v1))
+                    }
+                    else {
+                        Some(Primitive::Triangle(v1, v2, v3))
+                    }
                 }
                 else {
-                    Some(Primitive::Triangle(v1, v2, v3))
+                    unreachable!()
+                },
+            4 =>
+                if let (Primitive::Point(v1), Primitive::Point(v2), Primitive::Point(v3), Primitive::Point(v4)) = (tmp[0], tmp[1], tmp[2], tmp[3]) {
+                    Some(Primitive::Quad(v1, v2, v3, v4))
                 }
-            }
-            else {
-                unreachable!()
-            }
-        }
-        else if tmp.len() == 4 {
-            if let (Primitive::Point(v1), Primitive::Point(v2), Primitive::Point(v3), Primitive::Point(v4)) = (tmp[0], tmp[1], tmp[2], tmp[3]) {
-                Some(Primitive::Quad(v1, v2, v3, v4))
-            }
-            else {
-                unreachable!()
-            }
-        }
-        else if tmp.len() == 5 {
+                else {
+                    unreachable!()
+                },
             // a line and 4 points - find the line and return it
-            if let Some(l) = tmp.iter().find(|&&x| if let Primitive::Line(_,_) = x { true } else { false }) {
-                Some(*l)
-            }
-            else {
-                // this case (no line amongst the 5 intersections) should be impossible
-                unreachable!()
-            }
-        }
-        else if tmp.len() == 6 {
-            let mut tmp2 = Vec::new();
-            for p in tmp.iter() {
-                if let Primitive::Point(v) = *p {
-                    tmp2.push(v);
+            5 =>
+                if let Some(l) = tmp.iter().find(|&&x| if let Primitive::Line(_,_) = x { true } else { false }) {
+                    Some(*l)
                 }
-            }
-            if tmp2.len() == 0 {
-                Some(Primitive::Tetra(p1, p2, p3, p4))
-            }
-            else if tmp2.len() == 3 {
-                Some(Primitive::Triangle(tmp2[0], tmp2[1], tmp2[2]))
-            }
-            else {
-                unreachable!()
-            }
-        }
-        else {
-            unreachable!()
+                else {
+                    // this case (no line amongst the 5 intersections) should be impossible
+                    unreachable!()
+                },
+            6 => {
+                let mut tmp2 = Vec::new();
+                for p in tmp.iter() {
+                    if let Primitive::Point(v) = *p {
+                        tmp2.push(v);
+                    }
+                }
+                if tmp2.len() == 0 {
+                    Some(Primitive::Tetra(p1, p2, p3, p4))
+                }
+                else if tmp2.len() == 3 {
+                    Some(Primitive::Triangle(tmp2[0], tmp2[1], tmp2[2]))
+                }
+                else {
+                    unreachable!()
+                }
+            },
+            _ => unreachable!()
         }
     }
 
