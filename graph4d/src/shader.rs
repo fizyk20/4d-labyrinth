@@ -5,7 +5,7 @@ use super::geometry::Vector;
 pub struct GliumVertex {
     position: [f32; 3],
     normal: [f32; 3],
-    color: [f32; 4]
+    color: [f32; 4],
 }
 
 impl GliumVertex {
@@ -13,7 +13,7 @@ impl GliumVertex {
         GliumVertex {
             position: [p.x() as f32, p.y() as f32, p.z() as f32],
             normal: [n.x() as f32, n.y() as f32, n.z() as f32],
-            color: [c.r() as f32, c.g() as f32, c.b() as f32, c.a() as f32]
+            color: [c.r() as f32, c.g() as f32, c.b() as f32, c.a() as f32],
         }
     }
 
@@ -26,14 +26,14 @@ implement_vertex!(GliumVertex, position, normal, color);
 
 pub struct VertexInfo {
     vertices: Vec<GliumVertex>,
-    indices: Vec<u32>
+    indices: Vec<u32>,
 }
 
 impl VertexInfo {
     pub fn new(v: Vec<GliumVertex>, i: Vec<u32>) -> VertexInfo {
         VertexInfo {
             vertices: v,
-            indices: i
+            indices: i,
         }
     }
 

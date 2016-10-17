@@ -3,14 +3,14 @@ use super::Vector;
 #[derive(Clone, Copy)]
 pub struct Hyperplane {
     normal: Vector,
-    param: f64
+    param: f64,
 }
 
 impl Hyperplane {
     pub fn new(v: Vector, p: f64) -> Hyperplane {
         Hyperplane {
             normal: v,
-            param: p
+            param: p,
         }
     }
 

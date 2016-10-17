@@ -15,14 +15,12 @@ use std::collections::HashSet;
 use std::time::SystemTime;
 
 pub struct KeyboardState {
-    pressed_keys: HashSet<VirtualKeyCode>
+    pressed_keys: HashSet<VirtualKeyCode>,
 }
 
 impl KeyboardState {
     pub fn new() -> KeyboardState {
-        KeyboardState {
-            pressed_keys: HashSet::new()
-        }
+        KeyboardState { pressed_keys: HashSet::new() }
     }
 
     fn pressed(&mut self, key: VirtualKeyCode) {
@@ -63,14 +61,16 @@ fn main() {
 
             // listing the events produced by the window and waiting to be received
             for ev in display.poll_events() {
-                 match ev {
-                     glium::glutin::Event::Closed => return,   // the window has been closed by the user
-                     glium::glutin::Event::KeyboardInput(state, _, Some(key)) => match state {
-                         ElementState::Pressed => keyboard.pressed(key),
-                         ElementState::Released => keyboard.released(key)
-                     },
-                     _ => ()
-                 }
+                match ev {
+                    glium::glutin::Event::Closed => return,   // the window has been closed by the user
+                    glium::glutin::Event::KeyboardInput(state, _, Some(key)) => {
+                        match state {
+                            ElementState::Pressed => keyboard.pressed(key),
+                            ElementState::Released => keyboard.released(key),
+                        }
+                    }
+                    _ => (),
+                }
             }
 
             let frame_time = now.elapsed().unwrap();

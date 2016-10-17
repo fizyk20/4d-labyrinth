@@ -3,19 +3,17 @@ use super::vector::Vector;
 
 #[derive(Clone, Copy)]
 pub struct Matrix {
-    coords: [[f64; 5]; 5]
+    coords: [[f64; 5]; 5],
 }
 
 impl Matrix {
     pub fn identity() -> Matrix {
         Matrix {
-            coords: [
-                [1.0, 0.0, 0.0, 0.0, 0.0],
-                [0.0, 1.0, 0.0, 0.0, 0.0],
-                [0.0, 0.0, 1.0, 0.0, 0.0],
-                [0.0, 0.0, 0.0, 1.0, 0.0],
-                [0.0, 0.0, 0.0, 0.0, 1.0]
-            ]
+            coords: [[1.0, 0.0, 0.0, 0.0, 0.0],
+                     [0.0, 1.0, 0.0, 0.0, 0.0],
+                     [0.0, 0.0, 1.0, 0.0, 0.0],
+                     [0.0, 0.0, 0.0, 1.0, 0.0],
+                     [0.0, 0.0, 0.0, 0.0, 1.0]],
         }
     }
 
@@ -32,101 +30,99 @@ impl Matrix {
         let cosf = phi.cos();
         let cosf1 = 1.0 - cosf;
         Matrix {
-            coords: [
-                [(n1.x()*n1.x() + n2.x()*n2.x())*cosf1 + cosf,
-                 (n1.y()*n1.x() + n2.y()*n2.x())*cosf1 - (n1.z()*n2.w() - n1.w()*n2.z())*sinf,
-                 (n1.z()*n1.x() + n2.z()*n2.x())*cosf1 + (n1.y()*n2.w() - n1.w()*n2.y())*sinf,
-                 (n1.w()*n1.x() + n2.w()*n2.x())*cosf1 - (n1.y()*n2.z() - n1.z()*n2.y())*sinf,
-                 0.0],
-                [(n1.x()*n1.y() + n2.x()*n2.y())*cosf1 + (n1.z()*n2.w() - n1.w()*n2.z())*sinf,
-                 (n1.y()*n1.y() + n2.y()*n2.y())*cosf1 + cosf,
-                 (n1.z()*n1.y() + n2.z()*n2.y())*cosf1 - (n1.x()*n2.w() - n1.w()*n2.x())*sinf,
-                 (n1.w()*n1.y() + n2.w()*n2.y())*cosf1 + (n1.x()*n2.z() - n1.z()*n2.x())*sinf,
-                 0.0],
-                [(n1.x()*n1.z() + n2.x()*n2.z())*cosf1 - (n1.y()*n2.w() - n1.w()*n2.y())*sinf,
-                 (n1.y()*n1.z() + n2.y()*n2.z())*cosf1 + (n1.x()*n2.w() - n1.w()*n2.x())*sinf,
-                 (n1.z()*n1.z() + n2.z()*n2.z())*cosf1 + cosf,
-                 (n1.w()*n1.z() + n2.w()*n2.z())*cosf1 - (n1.x()*n2.y() - n1.y()*n2.x())*sinf,
-                 0.0],
-                [(n1.x()*n1.w() + n2.x()*n2.w())*cosf1 + (n1.y()*n2.z() - n1.z()*n2.y())*sinf,
-                 (n1.y()*n1.w() + n2.y()*n2.w())*cosf1 - (n1.x()*n2.z() - n1.z()*n2.x())*sinf,
-                 (n1.z()*n1.w() + n2.z()*n2.w())*cosf1 + (n1.x()*n2.y() - n1.y()*n2.x())*sinf,
-                 (n1.w()*n1.w() + n2.w()*n2.w())*cosf1 + cosf,
-                 0.0],
-                [0.0, 0.0, 0.0, 0.0, 1.0]
-            ]
+            coords: [[(n1.x() * n1.x() + n2.x() * n2.x()) * cosf1 + cosf,
+                      (n1.y() * n1.x() + n2.y() * n2.x()) * cosf1 -
+                      (n1.z() * n2.w() - n1.w() * n2.z()) * sinf,
+                      (n1.z() * n1.x() + n2.z() * n2.x()) * cosf1 +
+                      (n1.y() * n2.w() - n1.w() * n2.y()) * sinf,
+                      (n1.w() * n1.x() + n2.w() * n2.x()) * cosf1 -
+                      (n1.y() * n2.z() - n1.z() * n2.y()) * sinf,
+                      0.0],
+                     [(n1.x() * n1.y() + n2.x() * n2.y()) * cosf1 +
+                      (n1.z() * n2.w() - n1.w() * n2.z()) * sinf,
+                      (n1.y() * n1.y() + n2.y() * n2.y()) * cosf1 + cosf,
+                      (n1.z() * n1.y() + n2.z() * n2.y()) * cosf1 -
+                      (n1.x() * n2.w() - n1.w() * n2.x()) * sinf,
+                      (n1.w() * n1.y() + n2.w() * n2.y()) * cosf1 +
+                      (n1.x() * n2.z() - n1.z() * n2.x()) * sinf,
+                      0.0],
+                     [(n1.x() * n1.z() + n2.x() * n2.z()) * cosf1 -
+                      (n1.y() * n2.w() - n1.w() * n2.y()) * sinf,
+                      (n1.y() * n1.z() + n2.y() * n2.z()) * cosf1 +
+                      (n1.x() * n2.w() - n1.w() * n2.x()) * sinf,
+                      (n1.z() * n1.z() + n2.z() * n2.z()) * cosf1 + cosf,
+                      (n1.w() * n1.z() + n2.w() * n2.z()) * cosf1 -
+                      (n1.x() * n2.y() - n1.y() * n2.x()) * sinf,
+                      0.0],
+                     [(n1.x() * n1.w() + n2.x() * n2.w()) * cosf1 +
+                      (n1.y() * n2.z() - n1.z() * n2.y()) * sinf,
+                      (n1.y() * n1.w() + n2.y() * n2.w()) * cosf1 -
+                      (n1.x() * n2.z() - n1.z() * n2.x()) * sinf,
+                      (n1.z() * n1.w() + n2.z() * n2.w()) * cosf1 +
+                      (n1.x() * n2.y() - n1.y() * n2.x()) * sinf,
+                      (n1.w() * n1.w() + n2.w() * n2.w()) * cosf1 + cosf,
+                      0.0],
+                     [0.0, 0.0, 0.0, 0.0, 1.0]],
         }
     }
 
     pub fn rotation_xy(phi: f64) -> Matrix {
         Matrix {
-            coords: [
-                [ phi.cos(), -phi.sin(), 0.0, 0.0, 0.0 ],
-                [ phi.sin(), phi.cos(), 0.0, 0.0, 0.0 ],
-                [ 0.0, 0.0, 1.0, 0.0, 0.0 ],
-                [ 0.0, 0.0, 0.0, 1.0, 0.0 ],
-                [ 0.0, 0.0, 0.0, 0.0, 1.0 ]
-            ]
+            coords: [[phi.cos(), -phi.sin(), 0.0, 0.0, 0.0],
+                     [phi.sin(), phi.cos(), 0.0, 0.0, 0.0],
+                     [0.0, 0.0, 1.0, 0.0, 0.0],
+                     [0.0, 0.0, 0.0, 1.0, 0.0],
+                     [0.0, 0.0, 0.0, 0.0, 1.0]],
         }
     }
 
     pub fn rotation_xz(phi: f64) -> Matrix {
         Matrix {
-            coords: [
-                [ phi.cos(), 0.0, -phi.sin(), 0.0, 0.0 ],
-                [ 0.0, 1.0, 0.0, 0.0, 0.0 ],
-                [ phi.sin(), 0.0, phi.cos(), 0.0, 0.0 ],
-                [ 0.0, 0.0, 0.0, 1.0, 0.0 ],
-                [ 0.0, 0.0, 0.0, 0.0, 1.0 ]
-            ]
+            coords: [[phi.cos(), 0.0, -phi.sin(), 0.0, 0.0],
+                     [0.0, 1.0, 0.0, 0.0, 0.0],
+                     [phi.sin(), 0.0, phi.cos(), 0.0, 0.0],
+                     [0.0, 0.0, 0.0, 1.0, 0.0],
+                     [0.0, 0.0, 0.0, 0.0, 1.0]],
         }
     }
 
     pub fn rotation_xw(phi: f64) -> Matrix {
         Matrix {
-            coords: [
-                [ phi.cos(), 0.0, 0.0, -phi.sin(), 0.0 ],
-                [ 0.0, 1.0, 0.0, 0.0, 0.0 ],
-                [ 0.0, 0.0, 1.0, 0.0, 0.0 ],
-                [ phi.sin(), 0.0, 0.0, phi.cos(), 0.0 ],
-                [ 0.0, 0.0, 0.0, 0.0, 1.0 ]
-            ]
+            coords: [[phi.cos(), 0.0, 0.0, -phi.sin(), 0.0],
+                     [0.0, 1.0, 0.0, 0.0, 0.0],
+                     [0.0, 0.0, 1.0, 0.0, 0.0],
+                     [phi.sin(), 0.0, 0.0, phi.cos(), 0.0],
+                     [0.0, 0.0, 0.0, 0.0, 1.0]],
         }
     }
 
     pub fn rotation_yz(phi: f64) -> Matrix {
         Matrix {
-            coords: [
-                [ 1.0, 0.0, 0.0, 0.0, 0.0 ],
-                [ 0.0, phi.cos(), -phi.sin(), 0.0, 0.0 ],
-                [ 0.0, phi.sin(), phi.cos(), 0.0, 0.0 ],
-                [ 0.0, 0.0, 0.0, 1.0, 0.0 ],
-                [ 0.0, 0.0, 0.0, 0.0, 1.0 ]
-            ]
+            coords: [[1.0, 0.0, 0.0, 0.0, 0.0],
+                     [0.0, phi.cos(), -phi.sin(), 0.0, 0.0],
+                     [0.0, phi.sin(), phi.cos(), 0.0, 0.0],
+                     [0.0, 0.0, 0.0, 1.0, 0.0],
+                     [0.0, 0.0, 0.0, 0.0, 1.0]],
         }
     }
 
     pub fn rotation_yw(phi: f64) -> Matrix {
         Matrix {
-            coords: [
-                [ 1.0, 0.0, 0.0, 0.0, 0.0 ],
-                [ 0.0, phi.cos(), 0.0, -phi.sin(), 0.0 ],
-                [ 0.0, 0.0, 1.0, 0.0, 0.0 ],
-                [ 0.0, phi.sin(), 0.0, phi.cos(), 0.0 ],
-                [ 0.0, 0.0, 0.0, 0.0, 1.0 ]
-            ]
+            coords: [[1.0, 0.0, 0.0, 0.0, 0.0],
+                     [0.0, phi.cos(), 0.0, -phi.sin(), 0.0],
+                     [0.0, 0.0, 1.0, 0.0, 0.0],
+                     [0.0, phi.sin(), 0.0, phi.cos(), 0.0],
+                     [0.0, 0.0, 0.0, 0.0, 1.0]],
         }
     }
 
     pub fn rotation_zw(phi: f64) -> Matrix {
         Matrix {
-            coords: [
-                [ 1.0, 0.0, 0.0, 0.0, 0.0 ],
-                [ 0.0, 1.0, 0.0, 0.0, 0.0 ],
-                [ 0.0, 0.0, phi.cos(), -phi.sin(), 0.0 ],
-                [ 0.0, 0.0, phi.sin(), phi.cos(), 0.0 ],
-                [ 0.0, 0.0, 0.0, 0.0, 1.0 ]
-            ]
+            coords: [[1.0, 0.0, 0.0, 0.0, 0.0],
+                     [0.0, 1.0, 0.0, 0.0, 0.0],
+                     [0.0, 0.0, phi.cos(), -phi.sin(), 0.0],
+                     [0.0, 0.0, phi.sin(), phi.cos(), 0.0],
+                     [0.0, 0.0, 0.0, 0.0, 1.0]],
         }
     }
 
@@ -141,13 +137,11 @@ impl Matrix {
 
     pub fn scale(x: f64, y: f64, z: f64, w: f64) -> Matrix {
         Matrix {
-            coords: [
-                [x, 0.0, 0.0, 0.0, 0.0],
-                [0.0, y, 0.0, 0.0, 0.0],
-                [0.0, 0.0, z, 0.0, 0.0],
-                [0.0, 0.0, 0.0, w, 0.0],
-                [0.0, 0.0, 0.0, 0.0, 1.0]
-            ]
+            coords: [[x, 0.0, 0.0, 0.0, 0.0],
+                     [0.0, y, 0.0, 0.0, 0.0],
+                     [0.0, 0.0, z, 0.0, 0.0],
+                     [0.0, 0.0, 0.0, w, 0.0],
+                     [0.0, 0.0, 0.0, 0.0, 1.0]],
         }
     }
 }
@@ -212,7 +206,7 @@ impl ops::Mul<Vector> for Matrix {
 mod test {
     use super::Matrix;
     use super::super::Vector;
-    
+
     #[test]
     fn test_add_matrices() {
         let a = Matrix::from_array([[0.0, 1.0, 2.0, 3.0, 4.0],

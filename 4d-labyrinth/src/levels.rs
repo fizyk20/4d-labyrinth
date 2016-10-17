@@ -10,19 +10,19 @@ use regex::Regex;
 enum ReadState {
     NoLines,
     OneLine(String),
-    TwoLines(String, String)
+    TwoLines(String, String),
 }
 
 enum LineResult {
     Target(Target),
     Walls(Vec<Wall>),
-    Error
+    Error,
 }
 
 pub struct Level {
     walls: Vec<Wall>,
     target: Target,
-    player: Player
+    player: Player,
 }
 
 impl Level {
@@ -42,7 +42,10 @@ impl Level {
                     match Level::process_lines(s1, s2, s3) {
                         LineResult::Target(t) => target = Some(t),
                         LineResult::Walls(mut w) => walls.append(&mut w),
-                        LineResult::Error => return Err(io::Error::new(io::ErrorKind::InvalidData, "Invalid level definition"))
+                        LineResult::Error => {
+                            return Err(io::Error::new(io::ErrorKind::InvalidData,
+                                                      "Invalid level definition"))
+                        }
                     }
                     state = ReadState::NoLines;
                 }
@@ -51,7 +54,7 @@ impl Level {
         Ok(Level {
             player: Player::new(),
             target: target.unwrap(),
-            walls: walls
+            walls: walls,
         })
     }
 
@@ -59,16 +62,14 @@ impl Level {
         let coord_line = Regex::new(r"^(?P<x>-?\d+(\.\d+)?)\s+(?P<y>-?\d+(\.\d+)?)\s+(?P<z>-?\d+(\.\d+)?)\s+(?P<w>-?\d+(\.\d+)?)").unwrap();
         let cap1 = coord_line.captures(&s1).unwrap();
         let cap2 = coord_line.captures(&s2).unwrap();
-        let (x1, y1, z1, w1): (f64, f64, f64, f64) =
-            (cap1.name("x").unwrap().parse().unwrap(),
-             cap1.name("y").unwrap().parse().unwrap(),
-             cap1.name("z").unwrap().parse().unwrap(),
-             cap1.name("w").unwrap().parse().unwrap());
-        let (x2, y2, z2, w2): (f64, f64, f64, f64) =
-            (cap2.name("x").unwrap().parse().unwrap(),
-             cap2.name("y").unwrap().parse().unwrap(),
-             cap2.name("z").unwrap().parse().unwrap(),
-             cap2.name("w").unwrap().parse().unwrap());
+        let (x1, y1, z1, w1): (f64, f64, f64, f64) = (cap1.name("x").unwrap().parse().unwrap(),
+                                                      cap1.name("y").unwrap().parse().unwrap(),
+                                                      cap1.name("z").unwrap().parse().unwrap(),
+                                                      cap1.name("w").unwrap().parse().unwrap());
+        let (x2, y2, z2, w2): (f64, f64, f64, f64) = (cap2.name("x").unwrap().parse().unwrap(),
+                                                      cap2.name("y").unwrap().parse().unwrap(),
+                                                      cap2.name("z").unwrap().parse().unwrap(),
+                                                      cap2.name("w").unwrap().parse().unwrap());
 
         let (x1, x2) = if x1 < x2 { (x1, x2) } else { (x2, x1) };
         let (y1, y2) = if y1 < y2 { (y1, y2) } else { (y2, y1) };
@@ -76,24 +77,50 @@ impl Level {
         let (w1, w2) = if w1 < w2 { (w1, w2) } else { (w2, w1) };
 
         if s3 == "T" {
-            return LineResult::Target(Target::new(
-                    Vector::new((x1+x2)/2.0, (y1+y2)/2.0, (z1+z2)/2.0, (w1+w2)/2.0),
-                    x2 - x1));
+            return LineResult::Target(Target::new(Vector::new((x1 + x2) / 2.0,
+                                                              (y1 + y2) / 2.0,
+                                                              (z1 + z2) / 2.0,
+                                                              (w1 + w2) / 2.0),
+                                                  x2 - x1));
         }
 
         let mut walls = Vec::new();
 
         for c in s3.chars() {
             let (middle, size) = match c {
-                'x' => (Vector::new(x1, (y2+y1)/2.0, (z2+z1)/2.0, (w2+w1)/2.0), Vector::new(0.0, y2-y1, z2-z1, w2-w1)),
-                'X' => (Vector::new(x2, (y2+y1)/2.0, (z2+z1)/2.0, (w2+w1)/2.0), Vector::new(0.0, y2-y1, z2-z1, w2-w1)),
-                'y' => (Vector::new((x2+x1)/2.0, y1, (z2+z1)/2.0, (w2+w1)/2.0), Vector::new(x2-x1, 0.0, z2-z1, w2-w1)),
-                'Y' => (Vector::new((x2+x1)/2.0, y2, (z2+z1)/2.0, (w2+w1)/2.0), Vector::new(x2-x1, 0.0, z2-z1, w2-w1)),
-                'z' => (Vector::new((x2+x1)/2.0, (y2+y1)/2.0, z1, (w2+w1)/2.0), Vector::new(x2-x1, y2-y1, 0.0, w2-w1)),
-                'Z' => (Vector::new((x2+x1)/2.0, (y2+y1)/2.0, z2, (w2+w1)/2.0), Vector::new(x2-x1, y2-y1, 0.0, w2-w1)),
-                'w' => (Vector::new((x2+x1)/2.0, (y2+y1)/2.0, (z2+z1)/2.0, w1), Vector::new(x2-x1, y2-y1, z2-z1, 0.0)),
-                'W' => (Vector::new((x2+x1)/2.0, (y2+y1)/2.0, (z2+z1)/2.0, w2), Vector::new(x2-x1, y2-y1, z2-z1, 0.0)),
-                _ => return LineResult::Error
+                'x' => {
+                    (Vector::new(x1, (y2 + y1) / 2.0, (z2 + z1) / 2.0, (w2 + w1) / 2.0),
+                     Vector::new(0.0, y2 - y1, z2 - z1, w2 - w1))
+                }
+                'X' => {
+                    (Vector::new(x2, (y2 + y1) / 2.0, (z2 + z1) / 2.0, (w2 + w1) / 2.0),
+                     Vector::new(0.0, y2 - y1, z2 - z1, w2 - w1))
+                }
+                'y' => {
+                    (Vector::new((x2 + x1) / 2.0, y1, (z2 + z1) / 2.0, (w2 + w1) / 2.0),
+                     Vector::new(x2 - x1, 0.0, z2 - z1, w2 - w1))
+                }
+                'Y' => {
+                    (Vector::new((x2 + x1) / 2.0, y2, (z2 + z1) / 2.0, (w2 + w1) / 2.0),
+                     Vector::new(x2 - x1, 0.0, z2 - z1, w2 - w1))
+                }
+                'z' => {
+                    (Vector::new((x2 + x1) / 2.0, (y2 + y1) / 2.0, z1, (w2 + w1) / 2.0),
+                     Vector::new(x2 - x1, y2 - y1, 0.0, w2 - w1))
+                }
+                'Z' => {
+                    (Vector::new((x2 + x1) / 2.0, (y2 + y1) / 2.0, z2, (w2 + w1) / 2.0),
+                     Vector::new(x2 - x1, y2 - y1, 0.0, w2 - w1))
+                }
+                'w' => {
+                    (Vector::new((x2 + x1) / 2.0, (y2 + y1) / 2.0, (z2 + z1) / 2.0, w1),
+                     Vector::new(x2 - x1, y2 - y1, z2 - z1, 0.0))
+                }
+                'W' => {
+                    (Vector::new((x2 + x1) / 2.0, (y2 + y1) / 2.0, (z2 + z1) / 2.0, w2),
+                     Vector::new(x2 - x1, y2 - y1, z2 - z1, 0.0))
+                }
+                _ => return LineResult::Error,
             };
             let wall = Wall::new(middle, size);
             walls.push(wall);
@@ -109,8 +136,7 @@ impl Level {
     }
 
     pub fn collidables<'a>(&'a self) -> impl Iterator<Item=&'a Collidable> {
-        once(&self.target as &Collidable)
-            .chain(self.walls.iter().map(|x| x as &Collidable))
+        once(&self.target as &Collidable).chain(self.walls.iter().map(|x| x as &Collidable))
     }
 
     pub fn wins(&self, action: &AdditionalAction) -> bool {

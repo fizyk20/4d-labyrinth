@@ -18,7 +18,7 @@ const SIZE: f64 = 0.4;
 
 pub enum AdditionalAction {
     None,
-    MoveTo(Vector)
+    MoveTo(Vector),
 }
 
 pub struct Player {
@@ -27,7 +27,7 @@ pub struct Player {
     right: Vector,
     ana: Vector,
     position: Vector,
-    orientation: Matrix
+    orientation: Matrix,
 }
 
 impl Player {
@@ -38,12 +38,13 @@ impl Player {
             right: Vector::new(1.0, 0.0, 0.0, 0.0),
             ana: Vector::new(0.0, 0.0, 0.0, 1.0),
             position: Vector::new(0.0, 0.0, 0.0, 0.0),
-            orientation: Matrix::identity()
+            orientation: Matrix::identity(),
         }
     }
 
     pub fn go(&mut self, dir: Vector) {
-        self.position = self.position + self.up*dir.y() + self.right*dir.x() + self.front*dir.z() + self.ana*dir.w();
+        self.position = self.position + self.up * dir.y() + self.right * dir.x() +
+                        self.front * dir.z() + self.ana * dir.w();
     }
 
     fn apply_matrix(&mut self, matrix: Matrix) {
@@ -155,8 +156,7 @@ impl Player {
             let result = AdditionalAction::MoveTo(self.position);
             self.position = old_position;
             result
-        }
-        else {
+        } else {
             AdditionalAction::None
         }
     }
@@ -164,7 +164,7 @@ impl Player {
     pub fn perform_action(&mut self, action: AdditionalAction) {
         match action {
             AdditionalAction::MoveTo(pos) => self.position = pos,
-            _ => ()
+            _ => (),
         }
     }
 }
@@ -198,49 +198,39 @@ impl Camera for Player {
 pub struct Wall {
     middle: Vector,
     size: Vector,
-    transformation_matrix: Matrix
+    transformation_matrix: Matrix,
 }
 
 impl Wall {
     pub fn new(middle: Vector, size: Vector) -> Wall {
         let pi_2 = PI / 2.0;
-        let rotation_matrix =
-            if size.w() == 0.0 {
-                Matrix::identity()
-            }
-            else if size.x() == 0.0 {
-                Matrix::rotation_xw(pi_2)
-            }
-            else if size.y() == 0.0 {
-                Matrix::rotation_yw(pi_2)
-            }
-            else if size.z() == 0.0 {
-                Matrix::rotation_zw(pi_2)
-            }
-            else {
-                panic!("Wall without a zero dimension!")
-            };
-        let scale_matrix =
-            if size.w() == 0.0 {
-                Matrix::scale(size.x(), size.y(), size.z(), 1.0)
-            }
-            else if size.x() == 0.0 {
-                Matrix::scale(size.w(), size.y(), size.z(), 1.0)
-            }
-            else if size.y() == 0.0 {
-                Matrix::scale(size.x(), size.w(), size.z(), 1.0)
-            }
-            else if size.z() == 0.0 {
-                Matrix::scale(size.x(), size.y(), size.w(), 1.0)
-            }
-            else {
-                panic!("Wall without a zero dimension!")
-            };
+        let rotation_matrix = if size.w() == 0.0 {
+            Matrix::identity()
+        } else if size.x() == 0.0 {
+            Matrix::rotation_xw(pi_2)
+        } else if size.y() == 0.0 {
+            Matrix::rotation_yw(pi_2)
+        } else if size.z() == 0.0 {
+            Matrix::rotation_zw(pi_2)
+        } else {
+            panic!("Wall without a zero dimension!")
+        };
+        let scale_matrix = if size.w() == 0.0 {
+            Matrix::scale(size.x(), size.y(), size.z(), 1.0)
+        } else if size.x() == 0.0 {
+            Matrix::scale(size.w(), size.y(), size.z(), 1.0)
+        } else if size.y() == 0.0 {
+            Matrix::scale(size.x(), size.w(), size.z(), 1.0)
+        } else if size.z() == 0.0 {
+            Matrix::scale(size.x(), size.y(), size.w(), 1.0)
+        } else {
+            panic!("Wall without a zero dimension!")
+        };
         let translation_matrix = Matrix::translation(middle);
         Wall {
             middle: middle,
             size: size,
-            transformation_matrix: translation_matrix * rotation_matrix * scale_matrix
+            transformation_matrix: translation_matrix * rotation_matrix * scale_matrix,
         }
     }
 }
@@ -265,22 +255,22 @@ impl Collidable for Wall {
                 let w = (pos.w() - self.middle.w()).abs() < (self.size.w() + SIZE) / 2.0;
 
                 x && y && z && w
-            },
-            _ => false
+            }
+            _ => false,
         }
     }
 }
 
 pub struct Target {
     position: Vector,
-    size: f64
+    size: f64,
 }
 
 impl Target {
     pub fn new(position: Vector, size: f64) -> Target {
         Target {
             position: position,
-            size: size
+            size: size,
         }
     }
 }
@@ -305,8 +295,8 @@ impl Collidable for Target {
                 let w = (pos.w() - self.position.w()).abs() < (self.size + SIZE) / 2.0;
 
                 x && y && z && w
-            },
-            _ => false
+            }
+            _ => false,
         }
     }
 }

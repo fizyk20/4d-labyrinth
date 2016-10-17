@@ -12,7 +12,7 @@ pub struct Renderer {
     matrix_stack: Vec<Matrix>,
     prim_queue: Vec<Primitive>,
     current_color: Color,
-    shader: Program
+    shader: Program,
 }
 
 impl Renderer {
@@ -22,7 +22,7 @@ impl Renderer {
             matrix_stack: Vec::new(),
             prim_queue: Vec::new(),
             current_color: Color::rgb(1.0, 1.0, 1.0),
-            shader: Program::from_source(display, VERTEX_SHADER, FRAGMENT_SHADER, None).unwrap()
+            shader: Program::from_source(display, VERTEX_SHADER, FRAGMENT_SHADER, None).unwrap(),
         }
     }
 
@@ -69,25 +69,22 @@ impl Renderer {
     }
 
     pub fn tetrahedron(&mut self, v1: Vector, v2: Vector, v3: Vector, v4: Vector) {
-        self.prim_queue.push(Primitive::Tetra(
-            Vertex::new(self.current_transform * v1, self.current_color),
-            Vertex::new(self.current_transform * v2, self.current_color),
-            Vertex::new(self.current_transform * v3, self.current_color),
-            Vertex::new(self.current_transform * v4, self.current_color)
-        ));
+        self.prim_queue
+            .push(Primitive::Tetra(Vertex::new(self.current_transform * v1, self.current_color),
+                                   Vertex::new(self.current_transform * v2, self.current_color),
+                                   Vertex::new(self.current_transform * v3, self.current_color),
+                                   Vertex::new(self.current_transform * v4, self.current_color)));
     }
 
     pub fn cube(&mut self, a: f64) {
-        let v = [
-            Vector::new(-a/2.0, -a/2.0, -a/2.0, 0.0),
-            Vector::new(-a/2.0, -a/2.0,  a/2.0, 0.0),
-            Vector::new(-a/2.0,  a/2.0, -a/2.0, 0.0),
-            Vector::new(-a/2.0,  a/2.0,  a/2.0, 0.0),
-            Vector::new( a/2.0, -a/2.0, -a/2.0, 0.0),
-            Vector::new( a/2.0, -a/2.0,  a/2.0, 0.0),
-            Vector::new( a/2.0,  a/2.0, -a/2.0, 0.0),
-            Vector::new( a/2.0,  a/2.0,  a/2.0, 0.0)
-        ];
+        let v = [Vector::new(-a / 2.0, -a / 2.0, -a / 2.0, 0.0),
+                 Vector::new(-a / 2.0, -a / 2.0, a / 2.0, 0.0),
+                 Vector::new(-a / 2.0, a / 2.0, -a / 2.0, 0.0),
+                 Vector::new(-a / 2.0, a / 2.0, a / 2.0, 0.0),
+                 Vector::new(a / 2.0, -a / 2.0, -a / 2.0, 0.0),
+                 Vector::new(a / 2.0, -a / 2.0, a / 2.0, 0.0),
+                 Vector::new(a / 2.0, a / 2.0, -a / 2.0, 0.0),
+                 Vector::new(a / 2.0, a / 2.0, a / 2.0, 0.0)];
 
         self.tetrahedron(v[0], v[2], v[1], v[4]);
         self.tetrahedron(v[5], v[7], v[4], v[1]);
@@ -109,33 +106,31 @@ impl Renderer {
     }
 
     pub fn tesseract(&mut self, a: f64) {
-        let v = [
-            Vector::new(-a/2.0, -a/2.0, -a/2.0, -a/2.0),
-            Vector::new(-a/2.0, -a/2.0, -a/2.0,  a/2.0),
-            Vector::new(-a/2.0, -a/2.0,  a/2.0, -a/2.0),
-            Vector::new(-a/2.0, -a/2.0,  a/2.0,  a/2.0),
-            Vector::new(-a/2.0,  a/2.0, -a/2.0, -a/2.0),
-            Vector::new(-a/2.0,  a/2.0, -a/2.0,  a/2.0),
-            Vector::new(-a/2.0,  a/2.0,  a/2.0, -a/2.0),
-            Vector::new(-a/2.0,  a/2.0,  a/2.0,  a/2.0),
-            Vector::new( a/2.0, -a/2.0, -a/2.0, -a/2.0),
-            Vector::new( a/2.0, -a/2.0, -a/2.0,  a/2.0),
-            Vector::new( a/2.0, -a/2.0,  a/2.0, -a/2.0),
-            Vector::new( a/2.0, -a/2.0,  a/2.0,  a/2.0),
-            Vector::new( a/2.0,  a/2.0, -a/2.0, -a/2.0),
-            Vector::new( a/2.0,  a/2.0, -a/2.0,  a/2.0),
-            Vector::new( a/2.0,  a/2.0,  a/2.0, -a/2.0),
-            Vector::new( a/2.0,  a/2.0,  a/2.0,  a/2.0)
-        ];
+        let v = [Vector::new(-a / 2.0, -a / 2.0, -a / 2.0, -a / 2.0),
+                 Vector::new(-a / 2.0, -a / 2.0, -a / 2.0, a / 2.0),
+                 Vector::new(-a / 2.0, -a / 2.0, a / 2.0, -a / 2.0),
+                 Vector::new(-a / 2.0, -a / 2.0, a / 2.0, a / 2.0),
+                 Vector::new(-a / 2.0, a / 2.0, -a / 2.0, -a / 2.0),
+                 Vector::new(-a / 2.0, a / 2.0, -a / 2.0, a / 2.0),
+                 Vector::new(-a / 2.0, a / 2.0, a / 2.0, -a / 2.0),
+                 Vector::new(-a / 2.0, a / 2.0, a / 2.0, a / 2.0),
+                 Vector::new(a / 2.0, -a / 2.0, -a / 2.0, -a / 2.0),
+                 Vector::new(a / 2.0, -a / 2.0, -a / 2.0, a / 2.0),
+                 Vector::new(a / 2.0, -a / 2.0, a / 2.0, -a / 2.0),
+                 Vector::new(a / 2.0, -a / 2.0, a / 2.0, a / 2.0),
+                 Vector::new(a / 2.0, a / 2.0, -a / 2.0, -a / 2.0),
+                 Vector::new(a / 2.0, a / 2.0, -a / 2.0, a / 2.0),
+                 Vector::new(a / 2.0, a / 2.0, a / 2.0, -a / 2.0),
+                 Vector::new(a / 2.0, a / 2.0, a / 2.0, a / 2.0)];
 
-        self.cube_vertex_array(&v, [0,1,2,3,4,5,6,7]);
-        self.cube_vertex_array(&v, [8,9,10,11,12,13,14,15]);
-        self.cube_vertex_array(&v, [0,1,2,3,8,9,10,11]);
-        self.cube_vertex_array(&v, [4,5,6,7,12,13,14,15]);
-        self.cube_vertex_array(&v, [0,1,4,5,8,9,12,13]);
-        self.cube_vertex_array(&v, [2,3,6,7,10,11,14,15]);
-        self.cube_vertex_array(&v, [0,2,4,6,8,10,12,14]);
-        self.cube_vertex_array(&v, [1,3,5,7,9,11,13,15]);
+        self.cube_vertex_array(&v, [0, 1, 2, 3, 4, 5, 6, 7]);
+        self.cube_vertex_array(&v, [8, 9, 10, 11, 12, 13, 14, 15]);
+        self.cube_vertex_array(&v, [0, 1, 2, 3, 8, 9, 10, 11]);
+        self.cube_vertex_array(&v, [4, 5, 6, 7, 12, 13, 14, 15]);
+        self.cube_vertex_array(&v, [0, 1, 4, 5, 8, 9, 12, 13]);
+        self.cube_vertex_array(&v, [2, 3, 6, 7, 10, 11, 14, 15]);
+        self.cube_vertex_array(&v, [0, 2, 4, 6, 8, 10, 12, 14]);
+        self.cube_vertex_array(&v, [1, 3, 5, 7, 9, 11, 13, 15]);
     }
 
     fn get_perspective_matrix<S: Surface>(&self, surface: &S) -> [[f32; 4]; 4] {
@@ -148,15 +143,16 @@ impl Renderer {
 
         let f = 1.0 / (fov / 2.0).tan();
 
-        [
-            [f *   aspect_ratio   ,    0.0,              0.0              ,   0.0],
-            [         0.0         ,     f ,              0.0              ,   0.0],
-            [         0.0         ,    0.0,  (zfar+znear)/(zfar-znear)    ,   1.0],
-            [         0.0         ,    0.0, -(2.0*zfar*znear)/(zfar-znear),   0.0],
-        ]
+        [[f * aspect_ratio, 0.0, 0.0, 0.0],
+         [0.0, f, 0.0, 0.0],
+         [0.0, 0.0, (zfar + znear) / (zfar - znear), 1.0],
+         [0.0, 0.0, -(2.0 * zfar * znear) / (zfar - znear), 0.0]]
     }
 
-    pub fn render<F: Facade, C: Camera, S: Surface>(&mut self, facade: &F, camera: &C, surface: &mut S) {
+    pub fn render<F: Facade, C: Camera, S: Surface>(&mut self,
+                                                    facade: &F,
+                                                    camera: &C,
+                                                    surface: &mut S) {
         let mut local_queue = Vec::new();
         self.matrix_stack.clear();
 
@@ -176,27 +172,31 @@ impl Renderer {
 
             let params = glium::DrawParameters {
                 depth: glium::Depth {
-                            test: glium::draw_parameters::DepthTest::IfLess,
-                            write: vertices[0].color()[3] > 0.99,
-                            .. Default::default()
-                        },
-                blend: 
-                    if vertices[0].color()[3] < 1.0 {
-                        Blend::alpha_blending()
-                    } else {
-                        Default::default()
-                    },
-                .. Default::default()
+                    test: glium::draw_parameters::DepthTest::IfLess,
+                    write: vertices[0].color()[3] > 0.99,
+                    ..Default::default()
+                },
+                blend: if vertices[0].color()[3] < 1.0 {
+                    Blend::alpha_blending()
+                } else {
+                    Default::default()
+                },
+                ..Default::default()
             };
 
-            let vertices_buf = VertexBuffer::new(facade, &vertices).unwrap(); 
-            let indices_buf = IndexBuffer::new(facade, PrimitiveType::TrianglesList, &indices).unwrap();
+            let vertices_buf = VertexBuffer::new(facade, &vertices).unwrap();
+            let indices_buf = IndexBuffer::new(facade, PrimitiveType::TrianglesList, &indices)
+                .unwrap();
 
-            surface.draw(&vertices_buf, &indices_buf, &self.shader,
-                         &uniform! {
+            surface.draw(&vertices_buf,
+                      &indices_buf,
+                      &self.shader,
+                      &uniform! {
                              matrix: matrix,
                              u_light: [0.0, -0.6, -0.8f32]
-                         }, &params).unwrap();
+                         },
+                      &params)
+                .unwrap();
         }
 
         self.current_transform = Matrix::identity();

@@ -3,14 +3,12 @@ use std::cmp::PartialEq;
 
 #[derive(Clone, Copy)]
 pub struct Vector {
-    coords: [f64; 5]
+    coords: [f64; 5],
 }
 
 impl Vector {
     pub fn new(x: f64, y: f64, z: f64, w: f64) -> Vector {
-        Vector {
-            coords: [x, y, z, w, 1.0]
-        }
+        Vector { coords: [x, y, z, w, 1.0] }
     }
 
     pub fn from_array(arr: [f64; 5]) -> Vector {
@@ -19,7 +17,7 @@ impl Vector {
 
     pub fn projective_normalize(&mut self) {
         if self.coords[4] == 1.0 {
-            return
+            return;
         }
         self.coords[0] /= self.coords[4];
         self.coords[1] /= self.coords[4];
@@ -54,7 +52,7 @@ impl Vector {
     }
 
     pub fn dot(&self, other: Vector) -> f64 {
-        self.x()*other.x() + self.y()*other.y() + self.z()*other.z() + self.w()*other.w()
+        self.x() * other.x() + self.y() * other.y() + self.z() * other.z() + self.w() * other.w()
     }
 
     #[inline]
@@ -76,25 +74,37 @@ impl Vector {
 
     pub fn cross3(arg1: Vector, arg2: Vector) -> Vector {
         Vector {
-            coords: [
-                arg1.y() * arg2.z() - arg1.z() * arg2.y(),
-                arg1.z() * arg2.x() - arg1.x() * arg2.z(),
-                arg1.x() * arg2.y() - arg1.y() * arg2.x(),
-                0.0,
-                1.0
-            ]
+            coords: [arg1.y() * arg2.z() - arg1.z() * arg2.y(),
+                     arg1.z() * arg2.x() - arg1.x() * arg2.z(),
+                     arg1.x() * arg2.y() - arg1.y() * arg2.x(),
+                     0.0,
+                     1.0],
         }
     }
 
     pub fn cross4(arg1: Vector, arg2: Vector, arg3: Vector) -> Vector {
         Vector {
-            coords: [
-                arg1.y()*arg2.z()*arg3.w() + arg1.z()*arg2.w()*arg3.y() + arg1.w()*arg2.y()*arg3.z() - arg1.y()*arg2.w()*arg3.z() - arg1.z()*arg2.y()*arg3.w() - arg1.w()*arg2.z()*arg3.y(),
-                arg1.z()*arg2.w()*arg3.x() + arg1.w()*arg2.x()*arg3.z() + arg1.x()*arg2.z()*arg3.w() - arg1.z()*arg2.x()*arg3.w() - arg1.w()*arg2.z()*arg3.x() - arg1.x()*arg2.w()*arg3.z(),
-                arg1.w()*arg2.x()*arg3.y() + arg1.x()*arg2.y()*arg3.w() + arg1.y()*arg2.w()*arg3.x() - arg1.w()*arg2.y()*arg3.x() - arg1.x()*arg2.w()*arg3.y() - arg1.y()*arg2.x()*arg3.w(),
-                arg1.x()*arg2.y()*arg3.z() + arg1.y()*arg2.z()*arg3.x() + arg1.z()*arg2.x()*arg3.y() - arg1.x()*arg2.z()*arg3.y() - arg1.y()*arg2.x()*arg3.z() - arg1.z()*arg2.y()*arg3.x(),
-                1.0
-            ]
+            coords: [arg1.y() * arg2.z() * arg3.w() + arg1.z() * arg2.w() * arg3.y() +
+                     arg1.w() * arg2.y() * arg3.z() -
+                     arg1.y() * arg2.w() * arg3.z() -
+                     arg1.z() * arg2.y() * arg3.w() -
+                     arg1.w() * arg2.z() * arg3.y(),
+                     arg1.z() * arg2.w() * arg3.x() + arg1.w() * arg2.x() * arg3.z() +
+                     arg1.x() * arg2.z() * arg3.w() -
+                     arg1.z() * arg2.x() * arg3.w() -
+                     arg1.w() * arg2.z() * arg3.x() -
+                     arg1.x() * arg2.w() * arg3.z(),
+                     arg1.w() * arg2.x() * arg3.y() + arg1.x() * arg2.y() * arg3.w() +
+                     arg1.y() * arg2.w() * arg3.x() -
+                     arg1.w() * arg2.y() * arg3.x() -
+                     arg1.x() * arg2.w() * arg3.y() -
+                     arg1.y() * arg2.x() * arg3.w(),
+                     arg1.x() * arg2.y() * arg3.z() + arg1.y() * arg2.z() * arg3.x() +
+                     arg1.z() * arg2.x() * arg3.y() -
+                     arg1.x() * arg2.z() * arg3.y() -
+                     arg1.y() * arg2.x() * arg3.z() -
+                     arg1.z() * arg2.y() * arg3.x(),
+                     1.0],
         }
     }
 }
@@ -166,7 +176,7 @@ impl PartialEq for Vector {
 #[cfg(test)]
 mod test {
     use super::Vector;
-    
+
     #[test]
     fn test_add_vectors() {
         let a = Vector::new(0.0, 1.0, 2.0, 3.0);
