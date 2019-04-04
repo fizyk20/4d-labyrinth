@@ -28,4 +28,3 @@ Notes
 -----
 
 * The program uses OpenGL via the awesome [Glium](https://github.com/tomaka/glium) crate
-* Rust nightly is required for compilation due to some usage of the `impl Trait` feature
