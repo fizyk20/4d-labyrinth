@@ -1,5 +1,5 @@
-use super::primitive::Color;
 use super::geometry::Vector;
+use super::primitive::Color;
 
 #[derive(Clone, Copy)]
 pub struct GliumVertex {

@@ -2,6 +2,7 @@
 name = "4d-labyrinth"
 version = "0.1.0"
 authors = ["Bartłomiej Kamiński <fizyk20@gmail.com>"]
+edition = "2018"
 
 [dependencies]
 glium = "0.15"

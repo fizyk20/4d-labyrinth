@@ -1,4 +1,4 @@
-use super::geometry::{Vector, Hyperplane};
+use super::geometry::{Hyperplane, Vector};
 
 pub trait Camera {
     fn get_hyperplane(&self) -> Hyperplane;

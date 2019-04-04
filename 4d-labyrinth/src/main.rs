@@ -1,16 +1,10 @@
-#![feature(conservative_impl_trait)]
-
-extern crate graph4d;
-extern crate glium;
-extern crate regex;
-
-mod objects;
 mod levels;
+mod objects;
 
 use levels::Level;
 
-use glium::{DisplayBuild, Surface};
 use glium::glutin::{ElementState, VirtualKeyCode};
+use glium::{DisplayBuild, Surface};
 use std::collections::HashSet;
 use std::time::SystemTime;
 
@@ -20,7 +14,9 @@ pub struct KeyboardState {
 
 impl KeyboardState {
     pub fn new() -> KeyboardState {
-        KeyboardState { pressed_keys: HashSet::new() }
+        KeyboardState {
+            pressed_keys: HashSet::new(),
+        }
     }
 
     fn pressed(&mut self, key: VirtualKeyCode) {
@@ -39,7 +35,10 @@ impl KeyboardState {
 fn main() {
     let levels = ["level1.dat", "level2.dat"];
 
-    let display = glium::glutin::WindowBuilder::new().with_depth_buffer(24).build_glium().unwrap();
+    let display = glium::glutin::WindowBuilder::new()
+        .with_depth_buffer(24)
+        .build_glium()
+        .unwrap();
     let mut renderer = graph4d::renderer::Renderer::new(&display);
     let mut keyboard = KeyboardState::new();
 
@@ -47,7 +46,6 @@ fn main() {
     let mut level_num = 1u8;
 
     for level_file in &levels {
-
         let mut level = Level::from_file(level_file).unwrap();
 
         loop {
@@ -62,13 +60,11 @@ fn main() {
             // listing the events produced by the window and waiting to be received
             for ev in display.poll_events() {
                 match ev {
-                    glium::glutin::Event::Closed => return,   // the window has been closed by the user
-                    glium::glutin::Event::KeyboardInput(state, _, Some(key)) => {
-                        match state {
-                            ElementState::Pressed => keyboard.pressed(key),
-                            ElementState::Released => keyboard.released(key),
-                        }
-                    }
+                    glium::glutin::Event::Closed => return, // the window has been closed by the user
+                    glium::glutin::Event::KeyboardInput(state, _, Some(key)) => match state {
+                        ElementState::Pressed => keyboard.pressed(key),
+                        ElementState::Released => keyboard.released(key),
+                    },
                     _ => (),
                 }
             }
@@ -93,6 +89,5 @@ fn main() {
                 level.player().perform_action(action);
             }
         }
-
     }
 }

@@ -1,9 +1,9 @@
 use super::KeyboardState;
-use graph4d::renderer::Renderer;
-use graph4d::camera::Camera;
-use graph4d::geometry::{Vector, Matrix, Hyperplane};
-use graph4d::primitive::Color;
 use glium::glutin::VirtualKeyCode;
+use graph4d::camera::Camera;
+use graph4d::geometry::{Hyperplane, Matrix, Vector};
+use graph4d::primitive::Color;
+use graph4d::renderer::Renderer;
 use std::f64::consts::PI;
 
 pub trait GameObject {
@@ -43,8 +43,11 @@ impl Player {
     }
 
     pub fn go(&mut self, dir: Vector) {
-        self.position = self.position + self.up * dir.y() + self.right * dir.x() +
-                        self.front * dir.z() + self.ana * dir.w();
+        self.position = self.position
+            + self.up * dir.y()
+            + self.right * dir.x()
+            + self.front * dir.z()
+            + self.ana * dir.w();
     }
 
     fn apply_matrix(&mut self, matrix: Matrix) {
